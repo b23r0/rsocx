@@ -1,7 +1,4 @@
-﻿// Socks5.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "SocksMgr.h"
 
 #include "../thread/ThreadArray.h"

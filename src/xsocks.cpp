@@ -1,11 +1,8 @@
-﻿// xsocks.cpp : 定义控制台应用程序的入口点。
-//
-
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include <map>
 #include <string>
-#include "th3rd/dns.h"
 #include "Tunnel.h"
+#include "th3rd/dns.h"
 #include "socks/SocksMgr.h"
 
 using namespace std;
