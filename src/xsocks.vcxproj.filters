@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{19ff7669-ad45-4f65-a588-f85d5ac3cb3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tunnel">
+      <UniqueIdentifier>{6701e0f1-e78b-49ff-92b4-1b2bb0c3ab91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{3d84058c-0313-46d4-8935-8611310c82f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thread">
+      <UniqueIdentifier>{44150acd-c0bd-41b2-8da3-58361aa0bd36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="socks">
+      <UniqueIdentifier>{b55782c2-fff8-49c6-83cc-252543d268d9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="common\public.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="Tunnel.h">
+      <Filter>tunnel</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\AutoCleanup.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\ods.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\tstring.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Socket.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="thread\ThreadArray.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="common\CommonDefines.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="socks\SocksMgr.h">
+      <Filter>socks</Filter>
+    </ClInclude>
+    <ClInclude Include="socks\SocksParser.h">
+      <Filter>socks</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="xsocks.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Tunnel.cpp">
+      <Filter>tunnel</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\ods.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\tstring.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="thread\ThreadArray.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="socks\SocksMgr.cpp">
+      <Filter>socks</Filter>
+    </ClCompile>
+    <ClCompile Include="socks\SocksParser.cpp">
+      <Filter>socks</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
