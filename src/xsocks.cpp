@@ -19,9 +19,6 @@ typedef map<wstring,wstring> CMD_MAP;
 void Version()
 {
 	return;
-	infoLog(_T("Author : Floyd419#foxmail.com"));
-	infoLog(_T("Thanx  : S4n & Weini & Darkray "));
-	infoLog(_T("Copyright by Platonix Crew"));
 }
 
 void Usage()
