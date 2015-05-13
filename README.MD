@@ -7,10 +7,10 @@ It has support forward and reverse mode.
 More information about socks5 : [RFC1928](http://www.ietf.org/rfc/rfc1928.txt "RFC1928")
 ###Complier###
 
-####Windows
+#####Windows
 	devenv.exe build.sln /rebuild RELEASE
 
-####Linux
+#####Linux
 	make
 
 ###Usage###
