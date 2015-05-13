@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "../stdafx.h"
+
 #ifdef LINUX
 
 	typedef int SOCKET;
@@ -18,6 +20,13 @@
 	#pragma comment(lib,"ws2_32.lib")
 
 #endif
+
+#include <map>
+#include <string>
+typedef std::map<std::string,in_addr> DNS_CACHE;
+static CriticalSection g_csCache;
+
+static DNS_CACHE g_cache;
 
 #define CONNECTNUM 20
 
@@ -120,6 +129,20 @@ namespace Socket
 	}
 	static in_addr GetName(const char* name)
 	{
+		bool isFound = false;
+		g_csCache.Enter();
+
+		DNS_CACHE::iterator it = g_cache.find(name);
+		if ( it != g_cache.end())
+		{
+			isFound = true;
+		}
+
+		g_csCache.Leave();
+
+		if (isFound)
+			return it->second;
+
 		in_addr ret = { 0 };
 #ifdef LINUX
 		DNS::GetDns((char*)name,&ret);
@@ -134,6 +157,12 @@ namespace Socket
 		}
 
 #endif
+		g_csCache.Enter();
+
+		g_cache[name] = ret;
+
+		g_csCache.Leave();
+
 		return ret;
 	}
 

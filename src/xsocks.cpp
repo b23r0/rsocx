@@ -104,7 +104,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			ret = TRUE;
 			break;
 		}
-
+#ifdef LINUX
 		infoLog("Initialize DNS client....");
 		if ( !DNS::InitDns() )
 		{
@@ -112,7 +112,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			ret = TRUE;
 			break;
 		}
-
+#endif
 
 		//反弹模式
 		it = cmd.find(_T("-r"));
