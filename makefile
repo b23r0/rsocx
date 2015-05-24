@@ -9,6 +9,12 @@ all : $(OBJS)
 %.o: %.cpp
 	$(CC)     -c  $<    -o   $@    -I./src -DLINUX $(DEBUG)
 
+install :
+	cp ./bin/xsocks /bin/xsocks
+
+uninstall :
+	rm /bin/xsocks
+
 clean :
 	rm ./src/*.o
 	rm ./src/socks/*.o
