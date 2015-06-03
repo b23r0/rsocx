@@ -129,26 +129,27 @@ namespace Socket
 	}
 	static in_addr GetName(const char* name)
 	{
-		bool isFound = false;
-		g_csCache.Enter();
-
-		DNS_CACHE::iterator it = g_cache.find(name);
-		if ( it != g_cache.end())
-		{
-			isFound = true;
-		}
-
-		g_csCache.Leave();
-
-		if (isFound)
-			return it->second;
+//		bool isFound = false;
+// 		g_csCache.Enter();
+// 
+// 		DNS_CACHE::iterator it = g_cache.find(name);
+// 		if ( it != g_cache.end())
+// 		{
+// 			isFound = true;
+// 		}
+// 
+// 		g_csCache.Leave();
+// 
+// 		if (isFound)
+// 			return it->second;
 
 		in_addr ret = { 0 };
-#ifdef LINUX
-		DNS::GetDns((char*)name,&ret);
-#else
+// #ifdef LINUX
+// 		DNS::GetDns((char*)name,&ret);
+// #else
 		addrinfo *info = NULL;
 		addrinfo hint = {0};
+
 		int nRet = getaddrinfo(name,NULL,&hint,&info);
 
 		if (nRet == 0)
@@ -156,12 +157,12 @@ namespace Socket
 			ret = ((sockaddr_in*)info->ai_addr)->sin_addr;
 		}
 
-#endif
-		g_csCache.Enter();
-
-		g_cache[name] = ret;
-
-		g_csCache.Leave();
+/*#endif*/
+// 		g_csCache.Enter();
+// 
+// 		g_cache[name] = ret;
+// 
+// 		g_csCache.Leave();
 
 		return ret;
 	}

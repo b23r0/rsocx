@@ -2,7 +2,7 @@ CC = g++
 SRCS := $(wildcard ./src/*.cpp ./src/socks/*.cpp ./src/utils/*.cpp ./src/thread/*.cpp ./src/th3rd/*.cpp)
 OBJS := $(patsubst %cpp,%o,$(SRCS))
 DEBUG :=
-LFLAGS := $(DEBUG) -static
+LFLAGS := $(DEBUG)
 all : $(OBJS)
 	$(CC) -o ./bin/xsocks $^ -lpthread $(LFLAGS)
 

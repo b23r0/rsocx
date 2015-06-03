@@ -88,6 +88,7 @@ BOOL SocksParser::GetRequest( SERVICE_INFO& svc )
 		//如果请求DNS失败
 		if (svr.sin_addr.s_addr == 0)
 		{
+			errorLog(_T("QUERY DNS Error"));
 			return FALSE;
 		}
 
@@ -248,11 +249,11 @@ BOOL SocksParser::UDPResponse( SERVICE_INFO& svc )
 
 			desireAddr.sin_addr = GetName(szDomainName);
 
-			m_csDns.Enter();
-			{
-				m_dns[std::string(inet_ntoa(desireAddr.sin_addr))] = std::string(szDomainName);
-			}
-			m_csDns.Leave();
+// 			m_csDns.Enter();
+// 			{
+// 				m_dns[std::string(inet_ntoa(desireAddr.sin_addr))] = std::string(szDomainName);
+// 			}
+// 			m_csDns.Leave();
 			
 			i += 5;
 

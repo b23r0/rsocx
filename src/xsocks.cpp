@@ -102,13 +102,13 @@ int _tmain(int argc, _TCHAR* argv[])
 			break;
 		}
 #ifdef LINUX
-		infoLog("Initialize DNS client....");
-		if ( !DNS::InitDns() )
-		{
-			errorLog("Initialize DNS client faild!");
-			ret = TRUE;
-			break;
-		}
+// 		infoLog("Initialize DNS client....");
+// 		if ( !DNS::InitDns() )
+// 		{
+// 			errorLog("Initialize DNS client faild!");
+// 			ret = TRUE;
+// 			break;
+// 		}
 #endif
 
 		//反弹模式
