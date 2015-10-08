@@ -85,7 +85,6 @@
     <ClInclude Include="socks\SocksMgr.h" />
     <ClInclude Include="socks\SocksParser.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="thread\ThreadArray.h" />
     <ClInclude Include="Tunnel.h" />
     <ClInclude Include="utils\AutoCleanup.h" />
     <ClInclude Include="utils\ods.h" />
@@ -98,7 +97,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="thread\ThreadArray.cpp" />
     <ClCompile Include="Tunnel.cpp" />
     <ClCompile Include="utils\ods.cpp" />
     <ClCompile Include="utils\tstring.cpp" />

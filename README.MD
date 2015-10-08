@@ -12,8 +12,7 @@ Compiler & Install
 	devenv.exe build.sln /rebuild RELEASE
 
 #####Linux
-	make
-	sudo make install
+	make & sudo make install
 
 Usage
 ---
@@ -22,12 +21,12 @@ Usage
 
 Options
 ---
-		-l  Set forward mode on Socks5.
-		-r  Set reverse mode on Socks5.
-		-t  Build tunnel on socks5.
+		-l  Set forward mode.
+		-r  Set reverse mode.
+		-t  Build tunnel.
 		-s  Redirect another socks server.
-		-u  Socks5's login username.
-		-p  Socks5's login password.
+		-u  Login username.
+		-p  Login password.
 		-p1 Accept of XSOCKS client's port.
 		-p2 Accept of proxy  client's port.
 

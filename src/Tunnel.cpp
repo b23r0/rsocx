@@ -58,12 +58,13 @@ BOOL CTunnel::BindTunnel( int port1, int port2 )
 BOOL CTunnel::WaitTunnel()
 {
 	sockaddr_in svr;
-	
+	Thread t;
+
 	m_sMgr = Accept(m_s1,(sockaddr*)&svr);
 
 	if (m_sMgr != SOCKET_ERROR)
 	{
-		m_threadList.AddThreadTask((LPTHREAD_START_ROUTINE)CheckMgr,this);
+		t.Start((LPTHREAD_START_ROUTINE)CheckMgr,this);
 	}
 
 	return m_sMgr != SOCKET_ERROR;
@@ -79,6 +80,8 @@ DWORD WINAPI CTunnel::TunnelProc()
 	PROXY_CONFIG config;
 	TUNNEL_CONFIG* pTransInfo = NULL;
 	SOCKET s = INVALID_SOCKET;
+
+	Thread t;
 
 	while(TRUE)
 	{
@@ -100,7 +103,7 @@ DWORD WINAPI CTunnel::TunnelProc()
 		pTransInfo->s2 = config.s;
 		pTransInfo->lpParameter = this;
 
-		m_threadList.AddThreadTask((LPTHREAD_START_ROUTINE)TCPTunnel,pTransInfo);
+		t.Start((LPTHREAD_START_ROUTINE)TCPTunnel,pTransInfo);
 
 	}
 

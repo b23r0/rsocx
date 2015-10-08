@@ -5,7 +5,6 @@
 #include <set>
 #include "SocksParser.h"
 
-#include "../thread/ThreadArray.h"
 #include "../common/public.h"
 
 #pragma comment(lib,"ws2_32.lib")
@@ -35,7 +34,6 @@ public:
 
 	void SetAuth(LPCTSTR user,LPCTSTR pwd);
 
-	ThreadArray m_threadList;
 private:
 
 	BOOL Proxy(SOCKET s,LPSTR user , LPSTR pwd);

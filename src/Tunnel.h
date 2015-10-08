@@ -3,7 +3,6 @@
 #include <map>
 #include <iostream>
 
-#include "thread/ThreadArray.h"
 #include "socks/SocksParser.h"
 #include "common/public.h"
 
@@ -59,8 +58,6 @@ public:
 	SOCKET m_s2;
 	SOCKET m_s1;
 	SOCKET m_sMgr;
-
-	ThreadArray m_threadList;
 	
 	int m_port;
 };

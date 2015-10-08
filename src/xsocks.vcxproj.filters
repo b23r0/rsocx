@@ -22,9 +22,6 @@
     <Filter Include="utils">
       <UniqueIdentifier>{3d84058c-0313-46d4-8935-8611310c82f0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="thread">
-      <UniqueIdentifier>{44150acd-c0bd-41b2-8da3-58361aa0bd36}</UniqueIdentifier>
-    </Filter>
     <Filter Include="socks">
       <UniqueIdentifier>{b55782c2-fff8-49c6-83cc-252543d268d9}</UniqueIdentifier>
     </Filter>
@@ -54,9 +51,6 @@
     <ClInclude Include="common\Socket.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="thread\ThreadArray.h">
-      <Filter>thread</Filter>
-    </ClInclude>
     <ClInclude Include="common\CommonDefines.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -82,9 +76,6 @@
     </ClCompile>
     <ClCompile Include="utils\tstring.cpp">
       <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="thread\ThreadArray.cpp">
-      <Filter>thread</Filter>
     </ClCompile>
     <ClCompile Include="socks\SocksMgr.cpp">
       <Filter>socks</Filter>
