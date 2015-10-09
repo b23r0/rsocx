@@ -78,21 +78,21 @@ DWORD WINAPI CSocksMgr::TCPTunnel( LPVOID lpParameter )
 
 DWORD WINAPI CSocksMgr::TCPTunnelProc( LPVOID lpParameter )
 {
-	SERVICE_INFO* pSvcInfo = (SERVICE_INFO*)lpParameter;
+	SERVICE_INFO* pSvc = (SERVICE_INFO*)lpParameter;
 
 	Thread t1 , t2;
 
-	t1.Start((LPTHREAD_START_ROUTINE)TCP_C2S,pSvcInfo);
-	t2.Start((LPTHREAD_START_ROUTINE)TCP_S2C, pSvcInfo);
+	t1.Start((LPTHREAD_START_ROUTINE)TCP_C2S,pSvc);
+	t2.Start((LPTHREAD_START_ROUTINE)TCP_S2C, pSvc);
 
 	t1.WaitForEnd();
 	t2.WaitForEnd();
 
 
 	debugLog(_T("Tunnel thread finish!"));
-	if (pSvcInfo)
+	if (pSvc)
 	{
-		free(pSvcInfo);
+		free(pSvc);
 	}
 
 	return TRUE;
@@ -348,6 +348,8 @@ BOOL CSocksMgr::Begin( LPCSTR ip, int port )
 BOOL CSocksMgr::Begin( int port )
 {
 	SOCKET s = Socket::Create();
+
+
 
 	if (s == SOCKET_ERROR)
 		return 0;

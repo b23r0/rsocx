@@ -23,12 +23,12 @@ void Usage()
 	printf("\nUsage    : xsocks  [-l port] [-t] [-p1 port] [-p2 port] [-s ip:port] \n");
 	printf("                   [-r ip:port] [-u username] [-p password]          \n\n");
 
-	printf("Options  : -l  Set forward mode on Socks5.                              \n");
-	printf("           -r  Set reverse mode on Socks5.                              \n");
-	printf("           -t  Build tunnel on socks5.                                  \n");
+	printf("Options  : -l  Set forward mode.						               \n");
+	printf("           -r  Set reverse mode.							           \n");
+	printf("           -t  Build tunnel on socks5.                                 \n");
 	printf("           -s  Redirect another socks server.                          \n");
-	printf("           -u  Socks5's login username.                                \n");
-	printf("           -p  Socks5's login password.                                \n");
+	printf("           -u  Login username.				                           \n");
+	printf("           -p  Login password.					                       \n");
 	printf("           -p1 Accept of XSOCKS client's port.                         \n");
 	printf("           -p2 Accept of proxy  client's port.                       \n\n");
 

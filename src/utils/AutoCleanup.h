@@ -13,7 +13,7 @@
 	typedef pthread_t HANDLE;
 	#define WaitForSingleObject 		pthread_join
 
-	#define CRITICAL_SECTION 		pthread_mutex_t
+	#define CRITICAL_SECTION 			pthread_mutex_t
 	#define InitializeCriticalSection 	pthread_mutex_init
 	#define DeleteCriticalSection 		pthread_mutex_destroy
 	#define EnterCriticalSection 		pthread_mutex_lock
