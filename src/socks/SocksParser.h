@@ -19,8 +19,8 @@ enum CMDTYPE
 
 typedef struct
 {
-	SOCKET  socket;
-	SOCKET  usocket;
+	int  socket;
+	int  usocket;
 	sockaddr_in caddr;
 	sockaddr_in saddr;
 	in_addr  ipaddr;
@@ -28,8 +28,8 @@ typedef struct
 	unsigned short sq;
 
 	CMDTYPE type;
-	SOCKET slocal;
-	SOCKET sremote;
+	int slocal;
+	int sremote;
 	LPVOID lpParameter;
 }SERVICE_INFO,*PSERVICE_INFO;
 
@@ -43,9 +43,9 @@ private:
 	DNS_MAP m_dns;
 
 public:
-	BOOL Auth(int s,char* username,char* password,BOOL NeedAuth);
-	BOOL UDPResponse(SERVICE_INFO& svc);
-	BOOL TCPResponse( SERVICE_INFO& svc );
-	BOOL GetRequest( SERVICE_INFO& svc );
+	bool Auth(int s,char* username,char* password,bool NeedAuth);
+	bool UDPResponse(SERVICE_INFO& svc);
+	bool TCPResponse( SERVICE_INFO& svc );
+	bool GetRequest( SERVICE_INFO& svc );
 
 };

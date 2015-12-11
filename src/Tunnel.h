@@ -11,13 +11,13 @@
 #else
 #endif
 
-typedef std::set<SOCKET> SOCKET_SET;
-typedef std::map<SOCKET,SOCKET> NEXUS_MAP;
+typedef std::set<int> SOCKET_SET;
+typedef std::map<int,int> NEXUS_MAP;
 
 typedef struct 
 {
-	SOCKET s1;
-	SOCKET s2;
+	int s1;
+	int s2;
 	LPVOID lpParameter;
 }TUNNEL_CONFIG,*PTUNNEL_CONFIG;
 
@@ -28,14 +28,14 @@ class CTunnel
 
 public:
 
-	BOOL Begin(int ,int);
+	bool Begin(int ,int);
 	void Wait();
 	void Close();
 private:
 
-	BOOL BindTunnel(int, int);
+	bool BindTunnel(int, int);
 
-	BOOL WaitTunnel();
+	bool WaitTunnel();
 
 	static DWORD WINAPI Worker(LPVOID lpParameter);
 	DWORD WINAPI WorkerProc();
@@ -55,9 +55,9 @@ private:
 	
 public:
 
-	SOCKET m_s2;
-	SOCKET m_s1;
-	SOCKET m_sMgr;
+	int m_s2;
+	int m_s1;
+	int m_sMgr;
 	
 	int m_port;
 };

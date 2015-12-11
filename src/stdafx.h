@@ -10,7 +10,7 @@
 	#define FALSE false
 
 	typedef char* LPSTR;
-	typedef bool BOOL;
+	typedef bool bool;
 	typedef void* LPVOID;
 	typedef const char* LPCSTR;
 	typedef const char* LPCTSTR;
@@ -21,7 +21,7 @@
 	typedef unsigned short WORD;
 	typedef unsigned char BYTE;
 	typedef unsigned long DWORD_PTR;
-	typedef int SOCKET;
+	typedef int int;
 
 	typedef void* (*LPTHREAD_START_ROUTINE)(void*);
 

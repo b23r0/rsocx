@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "SocksParser.h"
 
-static SOCKET m_socket = 1020;
+static int m_socket = 1020;
 
 #ifdef LINUX
 #define MAKEWORD(a, b) ((WORD)(((BYTE)(((DWORD_PTR)(a)) & 0xff)) | ((WORD)((BYTE)(((DWORD_PTR)(b)) & 0xff))) << 8))
@@ -18,7 +18,7 @@ SocksParser::~SocksParser()
 
 }
 
-BOOL SocksParser::GetRequest( SERVICE_INFO& svc )
+bool SocksParser::GetRequest( SERVICE_INFO& svc )
 {
 	/*
 	 +----+-----+-------+------+----------+----------+
@@ -136,7 +136,7 @@ BOOL SocksParser::GetRequest( SERVICE_INFO& svc )
 	return TRUE;
 }
 
-BOOL SocksParser::TCPResponse( SERVICE_INFO& svc )
+bool SocksParser::TCPResponse( SERVICE_INFO& svc )
 {
 		/*
 		  +----+-----+-------+------+----------+----------+
@@ -160,7 +160,7 @@ BOOL SocksParser::TCPResponse( SERVICE_INFO& svc )
 
 		SendBuf(svc.socket,buffer,10);
 
-		BOOL ret = FALSE;
+		bool ret = FALSE;
 
 		do 
 		{
@@ -190,7 +190,7 @@ BOOL SocksParser::TCPResponse( SERVICE_INFO& svc )
 		return ret;
 }
 
-BOOL SocksParser::UDPResponse( SERVICE_INFO& svc )
+bool SocksParser::UDPResponse( SERVICE_INFO& svc )
 {
 	/*
 	+----+------+------+----------+----------+----------+
@@ -306,7 +306,7 @@ BOOL SocksParser::UDPResponse( SERVICE_INFO& svc )
 	return TRUE;
 }
 
-BOOL SocksParser::Auth(int s,char* username,char* password,BOOL NeedAuth)
+bool SocksParser::Auth(int s,char* username,char* password,bool NeedAuth)
 {
 	/*
 	  +----+----------+----------+

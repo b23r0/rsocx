@@ -49,7 +49,7 @@ public:
 		::LeaveCriticalSection(&m_section);
 	}
 
-	BOOL TryEnter()
+	bool TryEnter()
 	{
 		return ::TryEnterCriticalSection(&m_section);
 	}
@@ -79,7 +79,7 @@ public:
 #endif
 	}
 
-	BOOL Start(LPTHREAD_START_ROUTINE fnRoutine, LPVOID lpParameter)
+	bool Start(LPTHREAD_START_ROUTINE fnRoutine, LPVOID lpParameter)
 	{
 		if (NULL != m_hThread) return FALSE;
 
@@ -102,7 +102,7 @@ public:
 		#endif
 	}
 
-	BOOL WaitForEnd(DWORD dwTimeoutMS = INFINITE)
+	bool WaitForEnd(DWORD dwTimeoutMS = INFINITE)
 	{
 		if (NULL == m_hThread) return TRUE;
 
@@ -147,7 +147,7 @@ public:
 #endif
 		m_hThread = NULL;
 	}
-	BOOL IsRunning()
+	bool IsRunning()
 	{
 		return ! WaitForEnd(0);
 	}

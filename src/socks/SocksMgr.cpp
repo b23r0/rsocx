@@ -28,7 +28,7 @@ DWORD WINAPI CSocksMgr::TCP_S2C(void* lpParameter)
 			debugLog(_T("recv Error! %d"),WSAGetLastError());
 			break;
 		}
-		BOOL bRet = Socket::SendBuf(pSvcInfo->slocal,buffer,nCount);
+		bool bRet = Socket::SendBuf(pSvcInfo->slocal,buffer,nCount);
 
 		if (!bRet)
 		{
@@ -58,7 +58,7 @@ DWORD WINAPI CSocksMgr::TCP_C2S(void* lpParameter)
 			break;
 		}
 
-		BOOL bRet = Socket::SendBuf(pSvcInfo->sremote,buffer,nCount);
+		bool bRet = Socket::SendBuf(pSvcInfo->sremote,buffer,nCount);
 
 		if(!bRet)
 		{
@@ -98,12 +98,12 @@ DWORD WINAPI CSocksMgr::TCPTunnelProc( LPVOID lpParameter )
 	return TRUE;
 }
 
-BOOL CSocksMgr::Proxy( SOCKET s,LPSTR user , LPSTR pwd )
+bool CSocksMgr::Proxy( int s,LPSTR user , LPSTR pwd )
 {
 	SERVICE_INFO *pSvc = new SERVICE_INFO;
 	pSvc->socket = s;
 
-	BOOL ret = FALSE;
+	bool ret = FALSE;
 
 	do 
 	{
@@ -155,9 +155,9 @@ DWORD WINAPI CSocksMgr::Forward(void* lpParameter)
 
 DWORD WINAPI CSocksMgr::ForwardProc(void* lpParameter)
 {
-	SOCKET s = (SOCKET)lpParameter;
+	int s = (int)lpParameter;
 
-	BOOL ret = Proxy(s,(LPSTR)m_user.c_str(),(LPSTR)m_pwd.c_str());
+	bool ret = Proxy(s,(LPSTR)m_user.c_str(),(LPSTR)m_pwd.c_str());
 
 	if ( !ret )
 		Socket::Close(s);
@@ -174,10 +174,10 @@ DWORD WINAPI CSocksMgr::RedirectProc( LPVOID lpParameter )
 {
 	PROXY_CONFIG* config = (PROXY_CONFIG*)lpParameter;
 
-	SOCKET slocal = Socket::Create();
-	SOCKET sremote = Socket::Create();
+	int slocal = Socket::Create();
+	int sremote = Socket::Create();
 
-	BOOL ret = FALSE;
+	bool ret = FALSE;
 
 	do 
 	{
@@ -220,9 +220,9 @@ DWORD WINAPI CSocksMgr::Reverse(void* lpParameter)
 DWORD WINAPI CSocksMgr::ReverseProc(void* lpParameter)
 {
 	PROXY_CONFIG* config = (PROXY_CONFIG*)lpParameter;
-	SOCKET s = Socket::Create();
+	int s = Socket::Create();
 
-	BOOL ret = FALSE;
+	bool ret = FALSE;
 
 	do 
 	{
@@ -251,12 +251,12 @@ DWORD WINAPI CSocksMgr::ReverseProc(void* lpParameter)
 }
 
 
-BOOL CSocksMgr::Begin( LPCSTR ip1, int port1,LPCSTR ip2,int port2)
+bool CSocksMgr::Begin( LPCSTR ip1, int port1,LPCSTR ip2,int port2)
 {
 	m_rIp = ip2;
 	m_rPort = port2;
 
-	SOCKET s = Socket::Create();
+	int s = Socket::Create();
 
 	if (s == SOCKET_ERROR)
 		return 0;
@@ -272,7 +272,7 @@ BOOL CSocksMgr::Begin( LPCSTR ip1, int port1,LPCSTR ip2,int port2)
 	infoLog(_T("Connect Success!"));
 
 
-	BOOL ret = FALSE;
+	bool ret = FALSE;
 	PROXY_CONFIG* proxy = new PROXY_CONFIG;
 
 	do
@@ -300,9 +300,9 @@ BOOL CSocksMgr::Begin( LPCSTR ip1, int port1,LPCSTR ip2,int port2)
 	return ret;
 }
 
-BOOL CSocksMgr::Begin( LPCSTR ip, int port )
+bool CSocksMgr::Begin( LPCSTR ip, int port )
 {
-	SOCKET s = Socket::Create();
+	int s = Socket::Create();
 
 	if (s == SOCKET_ERROR)
 		return 0;
@@ -317,7 +317,7 @@ BOOL CSocksMgr::Begin( LPCSTR ip, int port )
 
 	infoLog(_T("Connect Success!"));
 
-	BOOL ret = FALSE;
+	bool ret = FALSE;
 	PROXY_CONFIG* proxy = new PROXY_CONFIG;
 
 	do
@@ -345,16 +345,16 @@ BOOL CSocksMgr::Begin( LPCSTR ip, int port )
 	return ret;
 }
 
-BOOL CSocksMgr::Begin( int port )
+bool CSocksMgr::Begin( int port )
 {
-	SOCKET s = Socket::Create();
+	int s = Socket::Create();
 
 
 
 	if (s == SOCKET_ERROR)
 		return 0;
 
-	BOOL ret = FALSE;
+	bool ret = FALSE;
 	do 
 	{
 		
@@ -370,7 +370,7 @@ BOOL CSocksMgr::Begin( int port )
 
 		while (TRUE)
 		{
-			SOCKET rs = Socket::Accept(s,(sockaddr*)&raddr);
+			int rs = Socket::Accept(s,(sockaddr*)&raddr);
 
 			if (rs == SOCKET_ERROR)
 			{

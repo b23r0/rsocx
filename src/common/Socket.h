@@ -4,7 +4,6 @@
 
 #ifdef LINUX
 
-	typedef int SOCKET;
 	#define SOCKET_ERROR -1
 
 	#include <arpa/inet.h>
@@ -32,12 +31,12 @@ static DNS_CACHE g_cache;
 
 namespace Socket
 {
-	static SOCKET Create(BOOL IsTcp = TRUE)
+	static int Create(bool IsTcp = TRUE)
 	{
 		return socket(AF_INET,IsTcp ? SOCK_STREAM : SOCK_DGRAM,0);
 	}
 
-	static BOOL Bind(SOCKET s,int port,sockaddr_in& addr)
+	static bool Bind(int s,int port,sockaddr_in& addr)
 	{
 		addr.sin_family = AF_INET;
 		addr.sin_port   = htons(port);
@@ -48,13 +47,13 @@ namespace Socket
 		return s != SOCKET_ERROR;
 	}
 
-	static SOCKET Accept(SOCKET s,sockaddr* out_addr)
+	static int Accept(int s,sockaddr* out_addr)
 	{
 		socklen_t nSize = sizeof(sockaddr);
 		return accept(s,out_addr,&nSize);
 	}
 
-	static BOOL Connect(SOCKET s, LPCSTR ip,int port )
+	static bool Connect(int s, LPCSTR ip,int port )
 	{
 		int size = 0;
 
@@ -71,14 +70,14 @@ namespace Socket
 		return s == 0;
 	}
 
-	static BOOL Connect(SOCKET s, sockaddr_in& r_addr )
+	static bool Connect(int s, sockaddr_in& r_addr )
 	{
 		s = connect(s,(struct sockaddr *)&r_addr,sizeof(sockaddr));
 
 		return s == 0;
 	}
 
-	static BOOL Listen(int s,int port)
+	static bool Listen(int s,int port)
 	{
 		sockaddr_in ServerAddr;
 
@@ -91,7 +90,7 @@ namespace Socket
 
 		return s == 0;
 	}
-	static BOOL SendBuf( int s,char* buf,int len )
+	static bool SendBuf( int s,char* buf,int len )
 	{
 		if (!len) 
 			return FALSE;
@@ -109,7 +108,7 @@ namespace Socket
 		}
 		return TRUE;
 	}
-	static BOOL RecvBuf( int s,char* buf,int len )
+	static bool RecvBuf( int s,char* buf,int len )
 	{
 		if (!len) 
 			return FALSE;
@@ -182,7 +181,7 @@ namespace Socket
 		in_addr HostAddr = GetName(name);
 		memcpy(buf,(void*)&HostAddr.s_addr,4);
 	}
-	static void Close(SOCKET s)
+	static void Close(int s)
 	{
 #ifdef LINUX
 		shutdown(s,SHUT_RDWR);

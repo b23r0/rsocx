@@ -76,7 +76,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	CMD_MAP cmd;
 
 	LoadCommand(argc,argv,cmd);
-	BOOL ret = FALSE;
+	bool ret = FALSE;
 
 	do 
 	{

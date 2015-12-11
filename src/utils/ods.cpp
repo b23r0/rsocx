@@ -25,7 +25,7 @@ typedef char TCHAR;
 
 void OutputFile(LPCTSTR content)
 {
-	static BOOL bOpened = FALSE;
+	static bool bOpened = FALSE;
 	g_fileSection.Enter();
 	{
 		do 

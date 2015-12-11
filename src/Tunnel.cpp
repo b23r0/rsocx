@@ -18,11 +18,11 @@ void CTunnel::Close()
 	Socket::Close(m_s1);
 	Socket::Close(m_s2);
 }
-BOOL CTunnel::BindTunnel( int port1, int port2 )
+bool CTunnel::BindTunnel( int port1, int port2 )
 {
 	m_port = port1;
 
-	BOOL ret = FALSE;
+	bool ret = FALSE;
 
 	do 
 	{
@@ -55,7 +55,7 @@ BOOL CTunnel::BindTunnel( int port1, int port2 )
 	return ret;
 }
 
-BOOL CTunnel::WaitTunnel()
+bool CTunnel::WaitTunnel()
 {
 	sockaddr_in svr;
 	Thread t;
@@ -79,7 +79,7 @@ DWORD WINAPI CTunnel::TunnelProc()
 {
 	PROXY_CONFIG config;
 	TUNNEL_CONFIG* pTransInfo = NULL;
-	SOCKET s = INVALID_SOCKET;
+	int s = INVALID_SOCKET;
 
 	Thread t;
 
@@ -87,12 +87,12 @@ DWORD WINAPI CTunnel::TunnelProc()
 	{
 		sockaddr_in svr;
 
-		SOCKET s = Accept(m_s1,(sockaddr*)&svr);
+		int s = Accept(m_s1,(sockaddr*)&svr);
 		
 		if (s <= 0)
 			break;
 
-		BOOL bRet = RecvBuf(s,(char*)&config,sizeof(PROXY_CONFIG));
+		bool bRet = RecvBuf(s,(char*)&config,sizeof(PROXY_CONFIG));
 
 		if (!bRet)
 			break;
@@ -121,7 +121,7 @@ DWORD WINAPI CTunnel::WorkerProc()
 {
 	sockaddr_in svr;
 	PROXY_CONFIG config;
-	SOCKET s = INVALID_SOCKET;
+	int s = INVALID_SOCKET;
 	while(TRUE)
 	{
 		s = Accept(m_s2,(sockaddr*)&svr);
@@ -134,7 +134,7 @@ DWORD WINAPI CTunnel::WorkerProc()
 		config.s = s;
 		config.port = m_port;
 
-		BOOL bRet = SendBuf(m_sMgr,(char*)&config,sizeof(PROXY_CONFIG));
+		bool bRet = SendBuf(m_sMgr,(char*)&config,sizeof(PROXY_CONFIG));
 
 		if(!bRet)
 			break;
@@ -226,11 +226,11 @@ DWORD WINAPI CTunnel::TCPTunnelProc( LPVOID lpParameter )
 	return 0;
 }
 
-BOOL CTunnel::Begin(int port1,int port2)
+bool CTunnel::Begin(int port1,int port2)
 {
 	infoLog(_T("Bind ports %d and %d..."),port1,port2);
 
-	BOOL ret = BindTunnel(port1,port2) && WaitTunnel();
+	bool ret = BindTunnel(port1,port2) && WaitTunnel();
 	
 	if ( !ret )
 	{

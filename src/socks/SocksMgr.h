@@ -17,16 +17,16 @@ typedef struct
 	int port;
 }CONNECT_INFO,*PCONNECT_INFO;
 
-typedef std::set<SOCKET> SOCKET_SET;
+typedef std::set<int> SOCKET_SET;
 
 class CSocksMgr
 {	
 	DECLARE_SINGLETON(CSocksMgr)
 
 public:
-	BOOL Begin( LPCSTR ip1, int port1,LPCSTR ip2,int port2);
-	BOOL Begin( LPCSTR ip, int port);
-	BOOL Begin( int port );
+	bool Begin( LPCSTR ip1, int port1,LPCSTR ip2,int port2);
+	bool Begin( LPCSTR ip, int port);
+	bool Begin( int port );
 
 	void Wait();
 
@@ -36,7 +36,7 @@ public:
 
 private:
 
-	BOOL Proxy(SOCKET s,LPSTR user , LPSTR pwd);
+	bool Proxy(int s,LPSTR user , LPSTR pwd);
 
 	static DWORD WINAPI TCP_C2S(void* lpParameter);
 	static DWORD WINAPI TCP_S2C(void* lpParameter);
@@ -58,6 +58,6 @@ private:
 	std::string m_rIp;
 	int m_rPort;
 
-	BOOL m_NeedAuth;
+	bool m_NeedAuth;
 };
 
