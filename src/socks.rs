@@ -1,15 +1,9 @@
 include!("utils.rs");
 
-#[cfg(target_os = "windows")]
-use std::os::windows::io::AsRawSocket;
-#[cfg(target_os = "linux")]
-use std::os::unix::prelude::{AsRawFd};
-#[cfg(target_os = "linux")]
-use errno::{Errno, errno};
-#[cfg(target_os = "linux")]
-use libc::{EINTR};
-use select_rs::{FD_ISSET, FD_SET, FD_ZERO, FdSet, select};
-use std::{io::{self, Read, Write}, net::{Ipv6Addr, Shutdown, SocketAddrV6, TcpStream}, ptr};
+use futures::{AsyncReadExt, AsyncWriteExt, FutureExt};
+use async_std::{net::{TcpStream}};
+use std::{ net::{Ipv6Addr, Shutdown, SocketAddrV6}};
+use futures::select;
 
 #[derive(Debug, Clone)]
 pub enum Addr {
@@ -17,7 +11,6 @@ pub enum Addr {
     V6([u8; 16]),
     Domain(Box<[u8]>)
 }
-
 
 fn format_ip_addr(addr :& Addr) -> String {
 	match addr {
@@ -37,14 +30,14 @@ fn format_ip_addr(addr :& Addr) -> String {
 	}
 }
 
-pub fn socksv5_handle(stream : &mut TcpStream) {
+pub async fn socksv5_handle(mut stream: TcpStream) {
     loop {
         let mut header = [0u8 ; 2];
-        match stream.read_exact(&mut header) {
+        match stream.read_exact(&mut header).await{
             Err(e) => {
-                log::info!("error: {}", e);
+                log::error!("error : {}" , e);
                 break;
-            },
+            }
             _ => {}
         };
         
@@ -54,11 +47,11 @@ pub fn socksv5_handle(stream : &mut TcpStream) {
         }
     
         let mut methods = vec![0u8; header[1] as usize].into_boxed_slice();
-        match stream.read_exact(&mut methods) {
+        match stream.read_exact(&mut methods).await{
             Err(e) => {
-                log::info!("error: {}", e);
+                log::error!("error : {}" , e);
                 break;
-            },
+            }
             _ => {}
         };
     
@@ -67,22 +60,22 @@ pub fn socksv5_handle(stream : &mut TcpStream) {
             break;
         }
     
-        match stream.write_all(&[5, 0]){
+        match stream.write_all(&[5, 0]).await{
             Err(e) => {
-                log::info!("error: {}", e);
+                log::error!("error : {}" , e);
                 break;
-            },
+            }
             _ => {}
         };
 
         let mut request =  [0u8; 4];
-        match stream.read_exact(&mut request){
+        match stream.read_exact(&mut request).await{
             Err(e) => {
-                log::error!("error: {}" , e);
+                log::error!("error : {}" , e);
                 break;
-            },
+            }
             _ => {}
-        }
+        };
 
         if request[0] != 5 {
             log::error!("say again not support version: {}" , request[0]);
@@ -97,43 +90,43 @@ pub fn socksv5_handle(stream : &mut TcpStream) {
         let addr = match request[3] {
             0x01 => {
                 let mut ipv4 =  [0u8; 4];
-                match stream.read_exact(&mut ipv4){
+                match stream.read_exact(&mut ipv4).await{
                     Err(e) => {
-                        log::error!("error: {}" , e);
+                        log::error!("error : {}" , e);
                         break;
-                    },
+                    }
                     _ => {}
-                }
+                };
                 Addr::V4(ipv4)
             },
             0x04 => {
                 let mut ipv6 =  [0u8; 16];
-                match stream.read_exact(&mut ipv6){
+                match stream.read_exact(&mut ipv6).await{
                     Err(e) => {
-                        log::error!("error: {}" , e);
+                        log::error!("error : {}" , e);
                         break;
-                    },
+                    }
                     _ => {}
-                }
+                };
                 Addr::V6(ipv6)
             },
             0x03 => {
                 let mut domain_size =  [0u8; 1];
-                match stream.read_exact(&mut domain_size){
+                match stream.read_exact(&mut domain_size).await{
                     Err(e) => {
-                        log::error!("error: {}" , e);
+                        log::error!("error : {}" , e);
                         break;
-                    },
+                    }
                     _ => {}
-                }
+                };
                 let mut domain =  vec![0u8; domain_size[0] as usize].into_boxed_slice();
-                match stream.read_exact(&mut domain){
+                match stream.read_exact(&mut domain).await{
                     Err(e) => {
-                        log::error!("error: {}" , e);
+                        log::error!("error : {}" , e);
                         break;
-                    },
+                    }
                     _ => {}
-                }
+                };
 
                 Addr::Domain(domain)
             },
@@ -144,11 +137,11 @@ pub fn socksv5_handle(stream : &mut TcpStream) {
         };
     
         let mut port = [0u8 ; 2];
-        match stream.read_exact(&mut port) {
+        match stream.read_exact(&mut port).await{
             Err(e) => {
-                log::info!("error: {}", e);
+                log::error!("error : {}" , e);
                 break;
-            },
+            }
             _ => {}
         };
 
@@ -156,11 +149,11 @@ pub fn socksv5_handle(stream : &mut TcpStream) {
         let address = format!("{}:{}" , format_ip_addr(&addr) , port);
 
         log::info!("proxy connect to {}:{}" , format_ip_addr(&addr) , port);
-        let client : io::Result<TcpStream>;
+        let client : std::io::Result<TcpStream>;
         match addr{
             Addr::V4(_) => {
                 
-                client = TcpStream::connect(address.clone());
+                client = TcpStream::connect(address.clone()).await;
             },
             Addr::V6(x) => {
                 let ipv6 = Ipv6Addr::new(
@@ -174,10 +167,10 @@ pub fn socksv5_handle(stream : &mut TcpStream) {
                     makeword(x[14] , x[15])
                 );
                 let v6sock = SocketAddrV6::new(ipv6 , port , 0 , 0 );
-                client = TcpStream::connect(v6sock);
+                client = TcpStream::connect(v6sock).await;
             },
             Addr::Domain(_) => {
-                client = TcpStream::connect(address.clone());
+                client = TcpStream::connect(address.clone()).await;
             }
         };
 
@@ -213,122 +206,77 @@ pub fn socksv5_handle(stream : &mut TcpStream) {
         reply.push((remote_port >> 8) as u8);
         reply.push(remote_port as u8);
     
-        match stream.write_all(&reply) {
+        match stream.write_all(&reply).await{
             Err(e) => {
-                log::info!("error: {}", e);
-                break;
-            },
-            Ok(_) => {}
-        };
-
-        match stream.set_nonblocking(true) {
-            Err(e) => {
-                log::info!("error: {}", e);
-                break;
-            },
-            Ok(_) => {}
-        };
-
-        match client.set_nonblocking(true) {
-            Err(e) => {
-                log::info!("error: {}", e);
-                break;
-            },
-            Ok(_) => {}
-        };
-
-        #[cfg(target_os = "linux")]
-        let fd1 = stream.as_raw_fd();
-        #[cfg(target_os = "linux")]
-        let fd2  = client.as_raw_fd();
-
-        #[cfg(target_os = "windows")]
-        let fd1 = stream.as_raw_socket();
-        #[cfg(target_os = "windows")]
-        let fd2  = client.as_raw_socket();
-        
-
-        let mut rd : FdSet = unsafe { std::mem::zeroed() };
-
-        loop{
-
-            FD_ZERO(&mut rd);
-            FD_SET(fd1, &mut rd);
-            FD_SET(fd2, &mut rd);
-
-            
-            let res = select(
-                #[cfg(target_os = "windows")]
-                0,
-                #[cfg(target_os = "linux")]
-                if fd1 > fd2 { fd1 + 1} else { fd2 + 1},
-                &mut rd , 
-                ptr::null_mut() , 
-                ptr::null_mut(),
-                ptr::null_mut());
-
-            if res < 0 {
-                #[cfg(target_os = "linux")]
-                if errno() == Errno(EINTR){
-                    continue
-                }
+                log::error!("error : {}" , e);
                 break;
             }
-
-            if FD_ISSET(fd1, &mut rd) {
-                let mut buf = [0u8 ; 1024];
-                let size = match stream.read(&mut buf){
-                    Err(e) => {
-                        log::info!("error: {}", e);
-                        break;
-                    },
-                    Ok(p) => p
-                };
-                
-                if size != 0 {
-                    match client.write_all(&mut buf[..size]){
-                        Err(e) => {
-                            log::info!("error: {}", e);
-                            break;
-                        },
-                        Ok(p) => p
-                    };
-                }
-            }
-
-            if FD_ISSET(fd2, &mut rd) {
-                let mut buf = [0u8 ; 1024];
-                let size = match client.read(&mut buf){
-                    Err(e) => {
-                        log::info!("error: {}", e);
-                        break;
-                    },
-                    Ok(p) => p
-                };
-                
-                if size != 0 {
-                    match stream.write_all(&mut buf[..size]){
-                        Err(e) => {
-                            log::info!("error: {}", e);
-                            break;
-                        },
-                        Ok(p) => p
-                    };
-                }
-            }
-
-        }
-
-        match client.shutdown(Shutdown::Both) {
-            Err(_) => {},
             _ => {}
         };
 
+        let mut buf1 = [0u8 ; 1024];
+        let mut buf2 = [0u8 ; 1024];
+        loop{
+            select! {
+                a = client.read(&mut buf1).fuse() => { 
+                        let a = match a{
+                            Err(e) => {
+                                log::error!("error : {}" , e);
+                                match stream.shutdown(Shutdown::Both) {
+                                    Err(e) => {
+                                        log::error!("error : {}" , e);
+                                    },
+                                    _ => {}
+                                };
+                                break;
+                            },
+                            Ok(p) => p
+                        };
+                        match stream.write_all(&mut buf1[..a]).await{
+                        Err(e) => {
+                            log::error!("error : {}" , e);
+                            match client.shutdown(Shutdown::Both) {
+                                Err(e) => {
+                                    log::error!("error : {}" , e);
+                                },
+                                _ => {}
+                            };
+                            break;
+                        }
+                        _ => {}
+                    }; 
+                },
+                b = stream.read(&mut buf2).fuse() =>  { 
+                    let b = match b{
+                        Err(e) => {
+                            log::error!("error : {}" , e);
+                            match client.shutdown(Shutdown::Both) {
+                                Err(e) => {
+                                    log::error!("error : {}" , e);
+                                },
+                                _ => {}
+                            };
+                            break;
+                        },
+                        Ok(p) => p
+                    };
+                    match client.write_all(&mut buf2[..b]).await{
+                        Err(e) => {
+                            log::error!("error : {}" , e);
+                            match stream.shutdown(Shutdown::Both) {
+                                Err(e) => {
+                                    log::error!("error : {}" , e);
+                                },
+                                _ => {}
+                            };
+                            break;
+                        }
+                        _ => {}
+                    };  
+                },
+            }
+        }
         break;
     }
-
-    match stream.shutdown(Shutdown::Both) {
-        Err(_) => {},
-        _ => {}
-    };
+    log::info!("finished");
 }

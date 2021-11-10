@@ -2,13 +2,16 @@ mod socks;
 
 use log::LevelFilter;
 use simple_logger::SimpleLogger;
-use std::{net::{TcpListener}, thread};
+
+use async_std::{io, net::{TcpListener}, prelude::*, task};
 
 fn usage() {
     return;
 }
 
-fn main() {
+
+#[async_std::main]
+async fn main() -> io::Result<()>  {
 	SimpleLogger::new().with_colors(true).init().unwrap();
 	::log::set_max_level(LevelFilter::Info);
 
@@ -16,50 +19,29 @@ fn main() {
 
 	if  arg_count == 1{
 		usage();
-		return;
 	}
 
 	let first  = std::env::args().nth(1).expect("parameter not enough");
 
 	match first.as_str() {
 		"-l" => {
-
-			let port = match std::env::args().nth(2) {
-				None => {
-					log::error!("not found listen port . eg : rsocx -l 1080");
-					return;
-				},
-				Some(p) => p
-			};
+			let port = std::env::args().nth(2).unwrap();
 			log::info!("listen to : {}" , "0.0.0.0:".to_string() + &port);
 			
-			let listener = match TcpListener::bind("0.0.0.0:".to_string() + &port) {
-				Err(_) => {
-					log::error!("bind port[0.0.0.0:{}] faild" , port);
-					return
-				},
-				Ok(p) => p
-			};
+			let listener = TcpListener::bind("0.0.0.0:".to_string() + &port).await?;
 
-			for stream in listener.incoming() {
-				match stream {
-					Ok(mut stream) => {
-						log::info!("accept from: {}", stream.peer_addr().unwrap());
-						thread::spawn(move|| {
-							socks::socksv5_handle(&mut stream);
-						});
-					}
-					Err(e) => {
-						log::info!("Error: {}", e);
-					}
-				}
+			let mut incoming = listener.incoming();
+
+			while let Some(stream) = incoming.next().await {
+				let stream = stream?;
+				task::spawn(async {
+					socks::socksv5_handle(stream).await;
+				});
 			}
-
-			return;
 		},
 		_ => {
 			usage();
-			return;
 		}
 	}
+	Ok(())
 }
