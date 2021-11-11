@@ -2,7 +2,7 @@ include!("utils.rs");
 
 use futures::{AsyncReadExt, AsyncWriteExt, FutureExt};
 use async_std::{net::{TcpStream}};
-use std::{ net::{Ipv6Addr, Shutdown, SocketAddrV6}};
+use std::{ net::{Ipv6Addr, SocketAddrV6}};
 use futures::select;
 
 #[derive(Debug, Clone)]
@@ -218,65 +218,51 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
         let mut buf2 = [0u8 ; 1024];
         loop{
             select! {
-                a = client.read(&mut buf1).fuse() => { 
-                        let a = match a{
-                            Err(e) => {
-                                log::error!("error : {}" , e);
-                                match stream.shutdown(Shutdown::Both) {
-                                    Err(e) => {
-                                        log::error!("error : {}" , e);
-                                    },
-                                    _ => {}
-                                };
-                                break;
-                            },
-                            Ok(p) => p
-                        };
-                        match stream.write_all(&mut buf1[..a]).await{
+                a = client.read(&mut buf1).fuse() => {
+
+                    let len = match a {
                         Err(e) => {
                             log::error!("error : {}" , e);
-                            match client.shutdown(Shutdown::Both) {
-                                Err(e) => {
-                                    log::error!("error : {}" , e);
-                                },
-                                _ => {}
-                            };
                             break;
                         }
-                        _ => {}
-                    }; 
-                },
-                b = stream.read(&mut buf2).fuse() =>  { 
-                    let b = match b{
-                        Err(e) => {
-                            log::error!("error : {}" , e);
-                            match client.shutdown(Shutdown::Both) {
-                                Err(e) => {
-                                    log::error!("error : {}" , e);
-                                },
-                                _ => {}
-                            };
-                            break;
-                        },
                         Ok(p) => p
                     };
-                    match client.write_all(&mut buf2[..b]).await{
+                    match stream.write_all(&mut buf1[..len]).await {
                         Err(e) => {
                             log::error!("error : {}" , e);
-                            match stream.shutdown(Shutdown::Both) {
-                                Err(e) => {
-                                    log::error!("error : {}" , e);
-                                },
-                                _ => {}
-                            };
                             break;
                         }
-                        _ => {}
-                    };  
+                        Ok(p) => p
+                    };
+
+                    if len == 0 {
+                        break;
+                    }
                 },
+                b = stream.read(&mut buf2).fuse() =>  { 
+                    let len = match b{
+                        Err(e) => {
+                            log::error!("error : {}" , e);
+                            break;
+                        }
+                        Ok(p) => p
+                    };
+                    match client.write_all(&mut buf2[..len]).await {
+                        Err(e) => {
+                            log::error!("error : {}" , e);
+                            break;
+                        }
+                        Ok(p) => p
+                    };
+                    if len == 0 {
+                        break;
+                    }
+                },
+                complete => break,
             }
         }
+        client.shutdown(std::net::Shutdown::Both).unwrap();
         break;
     }
-    log::info!("finished");
+    stream.shutdown(std::net::Shutdown::Both).unwrap();
 }

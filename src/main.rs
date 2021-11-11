@@ -19,16 +19,29 @@ async fn main() -> io::Result<()>  {
 
 	if  arg_count == 1{
 		usage();
+		return Ok(());
 	}
 
-	let first  = std::env::args().nth(1).expect("parameter not enough");
+	let first  = std::env::args().nth(1).unwrap();
 
 	match first.as_str() {
 		"-l" => {
-			let port = std::env::args().nth(2).unwrap();
+			let port = match std::env::args().nth(2){
+				None => {
+					log::error!("not found listen port . eg : cliws -l 8000");
+					return Ok(());
+				},
+				Some(p) => p
+			};
 			log::info!("listen to : {}" , "0.0.0.0:".to_string() + &port);
 			
-			let listener = TcpListener::bind("0.0.0.0:".to_string() + &port).await?;
+			let listener = match TcpListener::bind("0.0.0.0:".to_string() + &port).await{
+				Err(e) => {
+					log::error!("error : {}", e);
+					return Ok(());
+				},
+				Ok(p) => p
+			};
 
 			let mut incoming = listener.incoming();
 
