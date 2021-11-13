@@ -7,9 +7,9 @@ use futures::select;
 
 #[derive(Debug, Clone)]
 pub enum Addr {
-    V4([u8; 4]),
-    V6([u8; 16]),
-    Domain(Box<[u8]>)
+	V4([u8; 4]),
+	V6([u8; 16]),
+	Domain(Box<[u8]>)
 }
 
 fn format_ip_addr(addr :& Addr) -> String {
@@ -31,244 +31,244 @@ fn format_ip_addr(addr :& Addr) -> String {
 }
 
 pub async fn socksv5_handle(mut stream: TcpStream) {
-    loop {
-        let mut header = [0u8 ; 2];
-        match stream.read_exact(&mut header).await{
-            Err(e) => {
-                log::error!("error : {}" , e);
-                break;
-            }
-            _ => {}
-        };
-        
-        if header[0] != 5 {
-            log::error!("not support protocol version {}" , header[0]);
-            break;
-        }
-    
-        let mut methods = vec![0u8; header[1] as usize].into_boxed_slice();
-        match stream.read_exact(&mut methods).await{
-            Err(e) => {
-                log::error!("error : {}" , e);
-                break;
-            }
-            _ => {}
-        };
-    
-        if !methods.contains(&0u8) {
-            log::error!("just support no auth");
-            break;
-        }
-    
-        match stream.write_all(&[5, 0]).await{
-            Err(e) => {
-                log::error!("error : {}" , e);
-                break;
-            }
-            _ => {}
-        };
+	loop {
+		let mut header = [0u8 ; 2];
+		match stream.read_exact(&mut header).await{
+			Err(e) => {
+				log::error!("error : {}" , e);
+				break;
+			}
+			_ => {}
+		};
+		
+		if header[0] != 5 {
+			log::error!("not support protocol version {}" , header[0]);
+			break;
+		}
+	
+		let mut methods = vec![0u8; header[1] as usize].into_boxed_slice();
+		match stream.read_exact(&mut methods).await{
+			Err(e) => {
+				log::error!("error : {}" , e);
+				break;
+			}
+			_ => {}
+		};
+	
+		if !methods.contains(&0u8) {
+			log::error!("just support no auth");
+			break;
+		}
+	
+		match stream.write_all(&[5, 0]).await{
+			Err(e) => {
+				log::error!("error : {}" , e);
+				break;
+			}
+			_ => {}
+		};
 
-        let mut request =  [0u8; 4];
-        match stream.read_exact(&mut request).await{
-            Err(e) => {
-                log::error!("error : {}" , e);
-                break;
-            }
-            _ => {}
-        };
+		let mut request =  [0u8; 4];
+		match stream.read_exact(&mut request).await{
+			Err(e) => {
+				log::error!("error : {}" , e);
+				break;
+			}
+			_ => {}
+		};
 
-        if request[0] != 5 {
-            log::error!("say again not support version: {}" , request[0]);
-            break;
-        }
-    
-        if request[1] != 1 {
-            log::error!("not support cmd: {}" , request[0]);
-            break;
-        }
-    
-        let addr = match request[3] {
-            0x01 => {
-                let mut ipv4 =  [0u8; 4];
-                match stream.read_exact(&mut ipv4).await{
-                    Err(e) => {
-                        log::error!("error : {}" , e);
-                        break;
-                    }
-                    _ => {}
-                };
-                Addr::V4(ipv4)
-            },
-            0x04 => {
-                let mut ipv6 =  [0u8; 16];
-                match stream.read_exact(&mut ipv6).await{
-                    Err(e) => {
-                        log::error!("error : {}" , e);
-                        break;
-                    }
-                    _ => {}
-                };
-                Addr::V6(ipv6)
-            },
-            0x03 => {
-                let mut domain_size =  [0u8; 1];
-                match stream.read_exact(&mut domain_size).await{
-                    Err(e) => {
-                        log::error!("error : {}" , e);
-                        break;
-                    }
-                    _ => {}
-                };
-                let mut domain =  vec![0u8; domain_size[0] as usize].into_boxed_slice();
-                match stream.read_exact(&mut domain).await{
-                    Err(e) => {
-                        log::error!("error : {}" , e);
-                        break;
-                    }
-                    _ => {}
-                };
+		if request[0] != 5 {
+			log::error!("say again not support version: {}" , request[0]);
+			break;
+		}
+	
+		if request[1] != 1 {
+			log::error!("not support cmd: {}" , request[0]);
+			break;
+		}
+	
+		let addr = match request[3] {
+			0x01 => {
+				let mut ipv4 =  [0u8; 4];
+				match stream.read_exact(&mut ipv4).await{
+					Err(e) => {
+						log::error!("error : {}" , e);
+						break;
+					}
+					_ => {}
+				};
+				Addr::V4(ipv4)
+			},
+			0x04 => {
+				let mut ipv6 =  [0u8; 16];
+				match stream.read_exact(&mut ipv6).await{
+					Err(e) => {
+						log::error!("error : {}" , e);
+						break;
+					}
+					_ => {}
+				};
+				Addr::V6(ipv6)
+			},
+			0x03 => {
+				let mut domain_size =  [0u8; 1];
+				match stream.read_exact(&mut domain_size).await{
+					Err(e) => {
+						log::error!("error : {}" , e);
+						break;
+					}
+					_ => {}
+				};
+				let mut domain =  vec![0u8; domain_size[0] as usize].into_boxed_slice();
+				match stream.read_exact(&mut domain).await{
+					Err(e) => {
+						log::error!("error : {}" , e);
+						break;
+					}
+					_ => {}
+				};
 
-                Addr::Domain(domain)
-            },
-            _ => {
-                    log::error!("unknow atyp {}" , request[3]);
-                    break;
-            }
-        };
-    
-        let mut port = [0u8 ; 2];
-        match stream.read_exact(&mut port).await{
-            Err(e) => {
-                log::error!("error : {}" , e);
-                break;
-            }
-            _ => {}
-        };
+				Addr::Domain(domain)
+			},
+			_ => {
+					log::error!("unknow atyp {}" , request[3]);
+					break;
+			}
+		};
+	
+		let mut port = [0u8 ; 2];
+		match stream.read_exact(&mut port).await{
+			Err(e) => {
+				log::error!("error : {}" , e);
+				break;
+			}
+			_ => {}
+		};
 
-        let port = (port[0] as u16) << 8 | port[1] as u16;
-        let address = format!("{}:{}" , format_ip_addr(&addr) , port);
+		let port = (port[0] as u16) << 8 | port[1] as u16;
+		let address = format!("{}:{}" , format_ip_addr(&addr) , port);
 
-        log::info!("proxy connect to {}:{}" , format_ip_addr(&addr) , port);
-        let client : std::io::Result<TcpStream>;
-        match addr{
-            Addr::V4(_) => {
-                
-                client = TcpStream::connect(address.clone()).await;
-            },
-            Addr::V6(x) => {
-                let ipv6 = Ipv6Addr::new(
-                    makeword(x[0] , x[1]) , 
-                    makeword(x[2] , x[3]) , 
-                    makeword(x[4] , x[5]) , 
-                    makeword(x[6] , x[7])  , 
-                    makeword(x[8] , x[9]) , 
-                    makeword(x[10] , x[11]) , 
-                    makeword(x[12] , x[13]) , 
-                    makeword(x[14] , x[15])
-                );
-                let v6sock = SocketAddrV6::new(ipv6 , port , 0 , 0 );
-                client = TcpStream::connect(v6sock).await;
-            },
-            Addr::Domain(_) => {
-                client = TcpStream::connect(address.clone()).await;
-            }
-        };
+		log::info!("proxy connect to {}:{}" , format_ip_addr(&addr) , port);
+		let client : std::io::Result<TcpStream>;
+		match addr{
+			Addr::V4(_) => {
+				
+				client = TcpStream::connect(address.clone()).await;
+			},
+			Addr::V6(x) => {
+				let ipv6 = Ipv6Addr::new(
+					makeword(x[0] , x[1]) , 
+					makeword(x[2] , x[3]) , 
+					makeword(x[4] , x[5]) , 
+					makeword(x[6] , x[7])  , 
+					makeword(x[8] , x[9]) , 
+					makeword(x[10] , x[11]) , 
+					makeword(x[12] , x[13]) , 
+					makeword(x[14] , x[15])
+				);
+				let v6sock = SocketAddrV6::new(ipv6 , port , 0 , 0 );
+				client = TcpStream::connect(v6sock).await;
+			},
+			Addr::Domain(_) => {
+				client = TcpStream::connect(address.clone()).await;
+			}
+		};
 
-        let mut client = match client {
-            Err(_) => {
-                log::warn!("connect[{}] faild" , address);
-                break;
-            },
-            Ok(p) => p									
-        };
+		let mut client = match client {
+			Err(_) => {
+				log::warn!("connect[{}] faild" , address);
+				break;
+			},
+			Ok(p) => p
+		};
 
-        let remote_port = client.local_addr().unwrap().port();
+		let remote_port = client.local_addr().unwrap().port();
 
-        let mut reply = Vec::with_capacity(22);
-        reply.extend_from_slice(&[5, 0, 0]);
-    
-        match addr {
-            Addr::V4(x) => {
-                reply.push(1);
-                reply.extend_from_slice(&x);
-            },
-            Addr::V6(x) => {
-                reply.push(4);
-                reply.extend_from_slice(&x);
-            },
-            Addr::Domain(x) => {
-                reply.push(3);
-                reply.push(x.len() as u8);
-                reply.extend_from_slice(&x);
-            }
-        }
-    
-        reply.push((remote_port >> 8) as u8);
-        reply.push(remote_port as u8);
-    
-        match stream.write_all(&reply).await{
-            Err(e) => {
-                log::error!("error : {}" , e);
-                break;
-            }
-            _ => {}
-        };
+		let mut reply = Vec::with_capacity(22);
+		reply.extend_from_slice(&[5, 0, 0]);
+	
+		match addr {
+			Addr::V4(x) => {
+				reply.push(1);
+				reply.extend_from_slice(&x);
+			},
+			Addr::V6(x) => {
+				reply.push(4);
+				reply.extend_from_slice(&x);
+			},
+			Addr::Domain(x) => {
+				reply.push(3);
+				reply.push(x.len() as u8);
+				reply.extend_from_slice(&x);
+			}
+		}
+	
+		reply.push((remote_port >> 8) as u8);
+		reply.push(remote_port as u8);
+	
+		match stream.write_all(&reply).await{
+			Err(e) => {
+				log::error!("error : {}" , e);
+				break;
+			}
+			_ => {}
+		};
 
-        let mut buf1 = [0u8 ; 1024];
-        let mut buf2 = [0u8 ; 1024];
-        loop{
-            select! {
-                a = client.read(&mut buf1).fuse() => {
+		let mut buf1 = [0u8 ; 1024];
+		let mut buf2 = [0u8 ; 1024];
+		loop{
+			select! {
+				a = client.read(&mut buf1).fuse() => {
 
-                    let len = match a {
-                        Err(_) => {
-                            break;
-                        }
-                        Ok(p) => p
-                    };
-                    match stream.write_all(&mut buf1[..len]).await {
-                        Err(_) => {
-                            break;
-                        }
-                        Ok(p) => p
-                    };
+					let len = match a {
+						Err(_) => {
+							break;
+						}
+						Ok(p) => p
+					};
+					match stream.write_all(&mut buf1[..len]).await {
+						Err(_) => {
+							break;
+						}
+						Ok(p) => p
+					};
 
-                    if len == 0 {
-                        break;
-                    }
-                },
-                b = stream.read(&mut buf2).fuse() =>  { 
-                    let len = match b{
-                        Err(_) => {
-                            break;
-                        }
-                        Ok(p) => p
-                    };
-                    match client.write_all(&mut buf2[..len]).await {
-                        Err(_) => {
-                            break;
-                        }
-                        Ok(p) => p
-                    };
-                    if len == 0 {
-                        break;
-                    }
-                },
-                complete => break,
-            }
-        }
-        match client.shutdown(std::net::Shutdown::Both){
-            Err(e) => {
-                log::info!("error : {}" , e);
-            },
-            _ => {}
-        };
-        break;
-    }
-    match stream.shutdown(std::net::Shutdown::Both){
-        Err(e) => {
-            log::error!("error : {}" , e);
-        },
-        _ => {}
-    };
+					if len == 0 {
+						break;
+					}
+				},
+				b = stream.read(&mut buf2).fuse() =>  { 
+					let len = match b{
+						Err(_) => {
+							break;
+						}
+						Ok(p) => p
+					};
+					match client.write_all(&mut buf2[..len]).await {
+						Err(_) => {
+							break;
+						}
+						Ok(p) => p
+					};
+					if len == 0 {
+						break;
+					}
+				},
+				complete => break,
+			}
+		}
+		match client.shutdown(std::net::Shutdown::Both){
+			Err(e) => {
+				log::info!("error : {}" , e);
+			},
+			_ => {}
+		};
+		break;
+	}
+	match stream.shutdown(std::net::Shutdown::Both){
+		Err(e) => {
+			log::error!("error : {}" , e);
+		},
+		_ => {}
+	};
 }
