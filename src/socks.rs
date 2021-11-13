@@ -263,6 +263,7 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
 			},
 			_ => {}
 		};
+		log::info!("connection [{}] finished" , address);
 		break;
 	}
 	match stream.shutdown(std::net::Shutdown::Both){

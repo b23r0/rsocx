@@ -137,15 +137,13 @@ async fn main() -> io::Result<()>  {
 							a = proxy_stream.read(&mut buf1).fuse() => {
 			
 								let len = match a {
-									Err(e) => {
-										log::error!("error : {}" , e);
+									Err(_) => {
 										break;
 									}
 									Ok(p) => p
 								};
 								match stream.write_all(&mut buf1[..len]).await {
-									Err(e) => {
-										log::error!("error : {}" , e);
+									Err(_) => {
 										break;
 									}
 									Ok(p) => p
@@ -157,15 +155,13 @@ async fn main() -> io::Result<()>  {
 							},
 							b = stream.read(&mut buf2).fuse() =>  { 
 								let len = match b{
-									Err(e) => {
-										log::error!("error : {}" , e);
+									Err(_) => {
 										break;
 									}
 									Ok(p) => p
 								};
 								match proxy_stream.write_all(&mut buf2[..len]).await {
-									Err(e) => {
-										log::error!("error : {}" , e);
+									Err(_) => {
 										break;
 									}
 									Ok(p) => p
@@ -177,6 +173,15 @@ async fn main() -> io::Result<()>  {
 							complete => break,
 						}
 					}
+					match stream.shutdown(std::net::Shutdown::Both){
+						Err(_) => {},
+						_ => {}
+					};
+					match proxy_stream.shutdown(std::net::Shutdown::Both){
+						Err(_) => {},
+						_ => {}
+					};
+					log::info!("transfer [{}:{}] finished" , slave_addr.ip() , slave_addr.port());
 				});
 			}
 		},
