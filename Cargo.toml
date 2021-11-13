@@ -1,7 +1,12 @@
 [package]
 name = "rsocx"
 version = "0.1.0"
+authors = ["b23r0 <b23r0@foxmail.com>"]
 edition = "2021"
+description = "A high performence Socks5 proxy server with bind/reverse support implementation by Rust."
+repository = "https://github.com/b23r0/Cliws"
+readme = "README.md"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

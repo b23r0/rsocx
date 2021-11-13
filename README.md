@@ -1,5 +1,5 @@
-# rsocx [![Build Status](https://app.travis-ci.com/b23r0/rsocx.svg?branch=main)](https://app.travis-ci.com/b23r0/rsocx) [![ChatOnDiscord](https://img.shields.io/badge/chat-on%20discord-blue)](https://discord.gg/ZKtYMvDFN4)
-A high performence Socks5 proxy with bind/reverse support implementation by Rust
+# rsocx [![Build Status](https://app.travis-ci.com/b23r0/rsocx.svg?branch=main)](https://app.travis-ci.com/b23r0/rsocx) [![ChatOnDiscord](https://img.shields.io/badge/chat-on%20discord-blue)](https://discord.gg/ZKtYMvDFN4) [![Crate](https://img.shields.io/crates/v/rsocx)](https://crates.io/crates/rsocx)
+A high performence Socks5 proxy server with bind/reverse support implementation by Rust 
 
 # Features
 
@@ -13,7 +13,9 @@ A high performence Socks5 proxy with bind/reverse support implementation by Rust
 
 `$> cargo build --release`
 
-`$> ./target/release/rsocx`
+# Installation
+
+`$> cargo install rsocx`
 
 # Usage
 
@@ -49,12 +51,10 @@ print(time.time()-start)
 
 ## Test Envoriment
 
----
-
 | Envoriment    | Value           |
 |-------------- |-----------      |
 | Proxy OS      | Windows11       |
-| Proxy CPU     | i7-9700k        |
+| CPU           | i7-9700k        |
 | Target OS     | Ubuntu20.04     |
 | Network       | LAN             |
 | Target Server | [Tornado(Python)](https://github.com/tornadoweb/tornado/blob/master/demos/helloworld/helloworld.py) |
@@ -62,8 +62,6 @@ print(time.time()-start)
 | Socks5 client | Proxychains4    |
 
 ## Test Result
-
----
 
 | Project        | Language | Base        | Take Time |
 |----------------|----------|-------------|-----------|
@@ -78,4 +76,4 @@ print(time.time()-start)
 
 * https://github.com/ajmwagar/merino
 
-* https://github.com/kost/revsocks
+* https://github.com/ylxdzsw/v2socks
