@@ -6,14 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-byteorder = "1.0"
 simple_logger = "1.13.0"
 log = "0.4.14"
-select-rs = "0.1.1"
 futures = "0.3.0"
 async-std = {version = "1" , features = ["attributes"]}
-proc-macro-hack = "0.5.19"
-
-[target.'cfg(target_os = "linux")'.dependencies]
-errno = "0.2.8"
-libc = "0.2.107"
