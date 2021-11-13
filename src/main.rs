@@ -8,6 +8,7 @@ use futures::{AsyncReadExt, AsyncWriteExt, FutureExt, StreamExt};
 use async_std::{io, net::{TcpListener, TcpStream}, task};
 use futures::select;
 
+pub static MAGIC_FLAG : [u8;2] = [0x37, 0x37];
 
 fn usage() {
 	println!("rsocx - A high performence Socks5 proxy with bind/reverse support implementation by Rust");
@@ -92,7 +93,7 @@ async fn main() -> io::Result<()>  {
 				Ok(p) => p
 			};
 
-			log::info!("accept slave connection from : {}:{}" , slave_addr.ip() , slave_addr.port() );
+			log::info!("accept slave from : {}:{}" , slave_addr.ip() , slave_addr.port() );
 
 			log::info!("listen to : {}" , "0.0.0.0:".to_string() + &socks_port);
 			
@@ -109,7 +110,7 @@ async fn main() -> io::Result<()>  {
 			while let Some(stream) = incoming.next().await {
 				let mut stream = stream?;
 
-				match slave_stream.write_all(&[MAGIC_FLAG[0] , MAGIC_FLAG[1]]).await{
+				match slave_stream.write_all(&[MAGIC_FLAG[0]]).await{
 					Err(e) => {
 						log::error!("error : {}" , e);
 						break;
@@ -125,7 +126,7 @@ async fn main() -> io::Result<()>  {
 					Ok(p) => p
 				};
 
-				log::info!("accept from slave proxy connection : {}:{}" , slave_addr.ip() , slave_addr.port() );
+				log::info!("accept from slave : {}:{}" , slave_addr.ip() , slave_addr.port() );
 
 				task::spawn(async move {
 					let mut buf1 = [0u8 ; 1024];
@@ -182,14 +183,14 @@ async fn main() -> io::Result<()>  {
 		"-r" => {
 			let addr = match std::env::args().nth(2){
 				None => {
-					log::error!("not found connection ip . eg : rsocx -r 192.168.0.1 9000");
+					log::error!("not found ip . eg : rsocx -r 192.168.0.1 9000");
 					return Ok(());
 				},
 				Some(p) => p
 			};
 			let port = match std::env::args().nth(3){
 				None => {
-					log::error!("not found connection port . eg : rsocx -r 192.168.0.1 9000");
+					log::error!("not found port . eg : rsocx -r 192.168.0.1 9000");
 					return Ok(());
 				},
 				Some(p) => p
@@ -202,9 +203,9 @@ async fn main() -> io::Result<()>  {
 				},
 				Ok(p) => p
 			};
-
+			log::info!("connect to {} success" ,fulladdr );
 			loop {
-				let mut buf = [0u8 ; 2];
+				let mut buf = [0u8 ; 1];
 				match master_stream.read_exact(&mut buf).await{
 					Err(e) => {
 						log::error!("error : {}", e);
@@ -213,7 +214,7 @@ async fn main() -> io::Result<()>  {
 					Ok(p) => p
 				};
 	
-				if buf[0] == MAGIC_FLAG[0] && buf[1] == MAGIC_FLAG[1] {
+				if buf[0] == MAGIC_FLAG[0] {
 					let stream = match TcpStream::connect(fulladdr.clone()).await{
 						Err(e) => {
 							log::error!("error : {}", e);

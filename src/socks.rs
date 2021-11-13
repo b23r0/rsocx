@@ -221,15 +221,13 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
                 a = client.read(&mut buf1).fuse() => {
 
                     let len = match a {
-                        Err(e) => {
-                            log::error!("error : {}" , e);
+                        Err(_) => {
                             break;
                         }
                         Ok(p) => p
                     };
                     match stream.write_all(&mut buf1[..len]).await {
-                        Err(e) => {
-                            log::error!("error : {}" , e);
+                        Err(_) => {
                             break;
                         }
                         Ok(p) => p
@@ -241,15 +239,13 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
                 },
                 b = stream.read(&mut buf2).fuse() =>  { 
                     let len = match b{
-                        Err(e) => {
-                            log::error!("error : {}" , e);
+                        Err(_) => {
                             break;
                         }
                         Ok(p) => p
                     };
                     match client.write_all(&mut buf2[..len]).await {
-                        Err(e) => {
-                            log::error!("error : {}" , e);
+                        Err(_) => {
                             break;
                         }
                         Ok(p) => p
@@ -261,8 +257,18 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
                 complete => break,
             }
         }
-        client.shutdown(std::net::Shutdown::Both).unwrap();
+        match client.shutdown(std::net::Shutdown::Both){
+            Err(e) => {
+                log::info!("error : {}" , e);
+            },
+            _ => {}
+        };
         break;
     }
-    stream.shutdown(std::net::Shutdown::Both).unwrap();
+    match stream.shutdown(std::net::Shutdown::Both){
+        Err(e) => {
+            log::error!("error : {}" , e);
+        },
+        _ => {}
+    };
 }
