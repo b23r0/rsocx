@@ -5,6 +5,8 @@ A high performence Socks5 proxy with bind/reverse support implementation by Rust
 
 * Async-std
 * No unsafe code
+* Single executable
+* Linux/Windows/Mac/BSD support
 * Support reverse mode(Not bind any port in client)
 
 # Build & Run
