@@ -73,6 +73,7 @@ print(time.time()-start)
 | [asio5](https://github.com/liuaifu/asio5)          | C++      | Boost::Asio | 12.37s    |
 | [esocks](https://github.com/fengyouchao/esocks)          | Java      | Thread-Pool | 25.06s    |
 
+(Test Date : 13 Nov 2021)
 
 # Socks5 Protocol Support
 
