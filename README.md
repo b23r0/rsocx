@@ -71,6 +71,7 @@ print(time.time()-start)
 | [go-socks5](https://github.com/armon/go-socks5)      | Golang   | goroutine   | 12.31s    |
 | [simple-socks](https://github.com/brozeph/simple-socks)   | Nodejs   | async       | 13.71s     |
 | [asio5](https://github.com/liuaifu/asio5)          | C++      | Boost::Asio | 12.37s    |
+| [esocks](https://github.com/fengyouchao/esocks)          | Java      | Thread-Pool | 25.06s    |
 
 
 # Roadmap
