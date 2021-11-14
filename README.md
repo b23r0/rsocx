@@ -72,6 +72,18 @@ print(time.time()-start)
 | [simple-socks](https://github.com/brozeph/simple-socks)   | Nodejs   | async       | 13.71s     |
 | [asio5](https://github.com/liuaifu/asio5)          | C++      | Boost::Asio | 12.37s    |
 
+
+# Roadmap
+
+- [x] IPV6 Support
+- [ ] `SOCKS5` Authentication Methods
+  - [x] `NOAUTH` 
+  - [ ] `USERPASS`
+- [ ] `SOCKS5` Commands
+  - [x] `CONNECT`
+  - [ ] `BIND`
+  - [ ] `ASSOCIATE` 
+
 # Reference
 
 * https://github.com/ajmwagar/merino
