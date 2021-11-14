@@ -74,7 +74,7 @@ print(time.time()-start)
 | [esocks](https://github.com/fengyouchao/esocks)          | Java      | Thread-Pool | 25.06s    |
 
 
-# Roadmap
+# Socks5 Protocol Support
 
 - [x] IPV6 Support
 - [ ] `SOCKS5` Authentication Methods
