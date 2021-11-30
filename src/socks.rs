@@ -1,9 +1,9 @@
-include!("utils.rs");
-
 use futures::{AsyncReadExt, AsyncWriteExt, FutureExt};
 use async_std::{net::{TcpStream}};
 use std::{ net::{Ipv6Addr, SocketAddrV6}};
 use futures::select;
+
+use crate::utils::makeword;
 
 #[derive(Debug, Clone)]
 pub enum Addr {

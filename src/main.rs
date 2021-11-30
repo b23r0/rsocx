@@ -1,4 +1,4 @@
-include!("utils.rs");
+mod utils;
 mod socks;
 
 use log::LevelFilter;
@@ -7,8 +7,7 @@ use simple_logger::SimpleLogger;
 use futures::{AsyncReadExt, AsyncWriteExt, FutureExt, StreamExt};
 use async_std::{io, net::{TcpListener, TcpStream}, task};
 use futures::select;
-
-pub static MAGIC_FLAG : [u8;2] = [0x37, 0x37];
+use utils::MAGIC_FLAG;
 
 fn usage() {
 	println!("rsocx - A high performence Socks5 proxy with bind/reverse support implementation by Rust");
