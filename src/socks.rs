@@ -30,6 +30,124 @@ fn format_ip_addr(addr :& Addr) -> String {
 	}
 }
 
+async fn tcp_transfer(stream : &mut TcpStream , addr : &Addr, address : &String , port :u16 ){
+	log::info!("proxy connect to {}:{}" , format_ip_addr(&addr) , port);
+	let client : std::io::Result<TcpStream>;
+	match addr{
+		Addr::V4(_) => {
+			
+			client = TcpStream::connect(address.clone()).await;
+		},
+		Addr::V6(x) => {
+			let ipv6 = Ipv6Addr::new(
+				makeword(x[0] , x[1]) , 
+				makeword(x[2] , x[3]) , 
+				makeword(x[4] , x[5]) , 
+				makeword(x[6] , x[7])  , 
+				makeword(x[8] , x[9]) , 
+				makeword(x[10] , x[11]) , 
+				makeword(x[12] , x[13]) , 
+				makeword(x[14] , x[15])
+			);
+			let v6sock = SocketAddrV6::new(ipv6 , port , 0 , 0 );
+			client = TcpStream::connect(v6sock).await;
+		},
+		Addr::Domain(_) => {
+			client = TcpStream::connect(address.clone()).await;
+		}
+	};
+
+	let mut client = match client {
+		Err(_) => {
+			log::warn!("connect[{}] faild" , address);
+			return;
+		},
+		Ok(p) => p
+	};
+
+	let remote_port = client.local_addr().unwrap().port();
+
+	let mut reply = Vec::with_capacity(22);
+	reply.extend_from_slice(&[5, 0, 0]);
+
+	match addr {
+		Addr::V4(x) => {
+			reply.push(1);
+			reply.extend_from_slice(x);
+		},
+		Addr::V6(x) => {
+			reply.push(4);
+			reply.extend_from_slice(x);
+		},
+		Addr::Domain(x) => {
+			reply.push(3);
+			reply.push(x.len() as u8);
+			reply.extend_from_slice(&x);
+		}
+	}
+
+	reply.push((remote_port >> 8) as u8);
+	reply.push(remote_port as u8);
+
+	match stream.write_all(&reply).await{
+		Err(e) => {
+			log::error!("error : {}" , e);
+			return;
+		}
+		_ => {}
+	};
+
+	let mut buf1 = [0u8 ; 1024];
+	let mut buf2 = [0u8 ; 1024];
+	loop{
+		select! {
+			a = client.read(&mut buf1).fuse() => {
+
+				let len = match a {
+					Err(_) => {
+						break;
+					}
+					Ok(p) => p
+				};
+				match stream.write_all(&mut buf1[..len]).await {
+					Err(_) => {
+						break;
+					}
+					Ok(p) => p
+				};
+
+				if len == 0 {
+					break;
+				}
+			},
+			b = stream.read(&mut buf2).fuse() =>  { 
+				let len = match b{
+					Err(_) => {
+						break;
+					}
+					Ok(p) => p
+				};
+				match client.write_all(&mut buf2[..len]).await {
+					Err(_) => {
+						break;
+					}
+					Ok(p) => p
+				};
+				if len == 0 {
+					break;
+				}
+			},
+			complete => break,
+		}
+	}
+	match client.shutdown(std::net::Shutdown::Both){
+		Err(e) => {
+			log::info!("error : {}" , e);
+		},
+		_ => {}
+	};
+}
+
 pub async fn socksv5_handle(mut stream: TcpStream) {
 	loop {
 		let mut header = [0u8 ; 2];
@@ -82,7 +200,9 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
 			break;
 		}
 	
-		if request[1] != 1 {
+		let cmd = request[1];
+
+		if cmd != 1 || cmd != 3 {
 			log::error!("not support cmd: {}" , request[0]);
 			break;
 		}
@@ -148,121 +268,11 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
 		let port = (port[0] as u16) << 8 | port[1] as u16;
 		let address = format!("{}:{}" , format_ip_addr(&addr) , port);
 
-		log::info!("proxy connect to {}:{}" , format_ip_addr(&addr) , port);
-		let client : std::io::Result<TcpStream>;
-		match addr{
-			Addr::V4(_) => {
-				
-				client = TcpStream::connect(address.clone()).await;
-			},
-			Addr::V6(x) => {
-				let ipv6 = Ipv6Addr::new(
-					makeword(x[0] , x[1]) , 
-					makeword(x[2] , x[3]) , 
-					makeword(x[4] , x[5]) , 
-					makeword(x[6] , x[7])  , 
-					makeword(x[8] , x[9]) , 
-					makeword(x[10] , x[11]) , 
-					makeword(x[12] , x[13]) , 
-					makeword(x[14] , x[15])
-				);
-				let v6sock = SocketAddrV6::new(ipv6 , port , 0 , 0 );
-				client = TcpStream::connect(v6sock).await;
-			},
-			Addr::Domain(_) => {
-				client = TcpStream::connect(address.clone()).await;
-			}
-		};
-
-		let mut client = match client {
-			Err(_) => {
-				log::warn!("connect[{}] faild" , address);
-				break;
-			},
-			Ok(p) => p
-		};
-
-		let remote_port = client.local_addr().unwrap().port();
-
-		let mut reply = Vec::with_capacity(22);
-		reply.extend_from_slice(&[5, 0, 0]);
-	
-		match addr {
-			Addr::V4(x) => {
-				reply.push(1);
-				reply.extend_from_slice(&x);
-			},
-			Addr::V6(x) => {
-				reply.push(4);
-				reply.extend_from_slice(&x);
-			},
-			Addr::Domain(x) => {
-				reply.push(3);
-				reply.push(x.len() as u8);
-				reply.extend_from_slice(&x);
-			}
+		if cmd == 3 {
+			tcp_transfer(&mut stream , &addr , &address , port).await;
 		}
-	
-		reply.push((remote_port >> 8) as u8);
-		reply.push(remote_port as u8);
-	
-		match stream.write_all(&reply).await{
-			Err(e) => {
-				log::error!("error : {}" , e);
-				break;
-			}
-			_ => {}
-		};
+		
 
-		let mut buf1 = [0u8 ; 1024];
-		let mut buf2 = [0u8 ; 1024];
-		loop{
-			select! {
-				a = client.read(&mut buf1).fuse() => {
-
-					let len = match a {
-						Err(_) => {
-							break;
-						}
-						Ok(p) => p
-					};
-					match stream.write_all(&mut buf1[..len]).await {
-						Err(_) => {
-							break;
-						}
-						Ok(p) => p
-					};
-
-					if len == 0 {
-						break;
-					}
-				},
-				b = stream.read(&mut buf2).fuse() =>  { 
-					let len = match b{
-						Err(_) => {
-							break;
-						}
-						Ok(p) => p
-					};
-					match client.write_all(&mut buf2[..len]).await {
-						Err(_) => {
-							break;
-						}
-						Ok(p) => p
-					};
-					if len == 0 {
-						break;
-					}
-				},
-				complete => break,
-			}
-		}
-		match client.shutdown(std::net::Shutdown::Both){
-			Err(e) => {
-				log::info!("error : {}" , e);
-			},
-			_ => {}
-		};
 		log::info!("connection [{}] finished" , address);
 		break;
 	}
