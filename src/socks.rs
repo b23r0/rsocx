@@ -202,8 +202,8 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
 	
 		let cmd = request[1];
 
-		if cmd != 1 || cmd != 3 {
-			log::error!("not support cmd: {}" , request[0]);
+		if cmd != 1 && cmd != 3 {
+			log::error!("not support cmd: {}" , cmd);
 			break;
 		}
 	
@@ -268,7 +268,7 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
 		let port = (port[0] as u16) << 8 | port[1] as u16;
 		let address = format!("{}:{}" , format_ip_addr(&addr) , port);
 
-		if cmd == 3 {
+		if cmd == 1 {
 			tcp_transfer(&mut stream , &addr , &address , port).await;
 		}
 		
