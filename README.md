@@ -29,7 +29,7 @@ You can run a socks5 proxy and listen port at 1080
 
 First listen a port waiting for slave connection
 
-`$> ./rsocx -l 8000 1080`
+`$> ./rsocx -t 8000 1080`
 
 then reverse connect to master in slave
 

@@ -1,6 +1,6 @@
 [package]
 name = "rsocx"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["b23r0 <b23r0@foxmail.com>"]
 edition = "2021"
 description = "A high performence Socks5 proxy server with bind/reverse support implementation by Rust."
