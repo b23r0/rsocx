@@ -202,7 +202,7 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
 	
 		let cmd = request[1];
 
-		if cmd != 1 && cmd != 3 {
+		if cmd != 1 {
 			log::error!("not support cmd: {}" , cmd);
 			break;
 		}
