@@ -1,5 +1,5 @@
 # rsocx [![Build Status](https://img.shields.io/github/workflow/status/b23r0/rsocx/Rust)](https://github.com/b23r0/rsocx/actions/workflows/rust.yml) [![ChatOnDiscord](https://img.shields.io/badge/chat-on%20discord-blue)](https://discord.gg/ZKtYMvDFN4) [![Crate](https://img.shields.io/crates/v/rsocx)](https://crates.io/crates/rsocx)
-A high performence Socks5 proxy server with bind/reverse support implementation by Rust 
+A high performence Socks5 proxy server with bind/reverse support
 
 # Features
 
