@@ -23,17 +23,17 @@ A high performence Socks5 proxy server with bind/reverse support implementation 
 
 You can run a socks5 proxy and listen port at 1080
 
-`$> ./rsocx -l 1080`
+`$> ./rsocx -l 0.0.0.0:1080`
 
 ## Reverse Mode
 
 First listen a port waiting for slave connection
 
-`$> ./rsocx -t 8000 1080`
+`$> ./rsocx -t 0.0.0.0:8000 -s 0.0.0.0:1080`
 
 then reverse connect to master in slave
 
-`$> ./cliws -r 127.0.0.1 8000`
+`$> ./cliws -r 127.0.0.1:8000`
 
 # Benchmark
 

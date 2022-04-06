@@ -11,7 +11,8 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-simple_logger = "1.13.0"
+simple_logger = "2.1.0"
 log = "0.4.14"
 futures = "0.3.0"
 async-std = {version = "1" , features = ["attributes"]}
+getopts = "0.2"
