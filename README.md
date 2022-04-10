@@ -3,7 +3,7 @@ A high performence Socks5 proxy server with bind/reverse support
 
 # Features
 
-* Async-std
+* Async
 * No unsafe code
 * Single executable
 * Linux/Windows/Mac/BSD support

@@ -1,7 +1,6 @@
-use futures::{AsyncReadExt, AsyncWriteExt, FutureExt};
-use async_std::{net::{TcpStream}};
 use std::{ net::{Ipv6Addr, SocketAddrV6}};
-use futures::select;
+
+use tokio::{net::TcpStream, io::{AsyncWriteExt, AsyncReadExt}};
 
 use crate::utils::makeword;
 
@@ -100,8 +99,8 @@ async fn tcp_transfer(stream : &mut TcpStream , addr : &Addr, address : &String 
 	let mut buf1 = [0u8 ; 1024];
 	let mut buf2 = [0u8 ; 1024];
 	loop{
-		select! {
-			a = client.read(&mut buf1).fuse() => {
+		tokio::select! {
+			a = client.read(&mut buf1) => {
 
 				let len = match a {
 					Err(_) => {
@@ -120,7 +119,7 @@ async fn tcp_transfer(stream : &mut TcpStream , addr : &Addr, address : &String 
 					break;
 				}
 			},
-			b = stream.read(&mut buf2).fuse() =>  { 
+			b = stream.read(&mut buf2) =>  { 
 				let len = match b{
 					Err(_) => {
 						break;
@@ -137,15 +136,8 @@ async fn tcp_transfer(stream : &mut TcpStream , addr : &Addr, address : &String 
 					break;
 				}
 			},
-			complete => break,
 		}
 	}
-	match client.shutdown(std::net::Shutdown::Both){
-		Err(e) => {
-			log::info!("error : {}" , e);
-		},
-		_ => {}
-	};
 }
 
 pub async fn socksv5_handle(mut stream: TcpStream) {
@@ -276,10 +268,4 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
 		log::info!("connection [{}] finished" , address);
 		break;
 	}
-	match stream.shutdown(std::net::Shutdown::Both){
-		Err(e) => {
-			log::error!("error : {}" , e);
-		},
-		_ => {}
-	};
 }

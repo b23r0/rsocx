@@ -4,9 +4,7 @@ mod socks;
 use log::LevelFilter;
 use simple_logger::SimpleLogger;
 use getopts::Options;
-use futures::{AsyncReadExt, AsyncWriteExt, FutureExt, StreamExt};
-use async_std::{io, net::{TcpListener, TcpStream}, task};
-use futures::select;
+use tokio::{io::{self, AsyncWriteExt, AsyncReadExt}, task, net::{TcpListener, TcpStream}};
 use utils::MAGIC_FLAG;
 
 fn usage(program: &str, opts: &Options) {
@@ -18,7 +16,7 @@ fn usage(program: &str, opts: &Options) {
 }
 
 
-#[async_std::main]
+#[tokio::main]
 async fn main() -> io::Result<()>  {
 	SimpleLogger::new().with_utc_timestamps().with_utc_timestamps().with_colors(true).init().unwrap();
 	::log::set_max_level(LevelFilter::Info);
@@ -77,11 +75,9 @@ async fn main() -> io::Result<()>  {
 			Ok(p) => p
 		};
 
-		let mut incoming = listener.incoming();
-
-		while let Some(stream) = incoming.next().await {
-			let stream = stream?;
-			task::spawn(async {
+		loop{
+			let (stream , _) = listener.accept().await.unwrap();
+			tokio::spawn(async {
 				socks::socksv5_handle(stream).await;
 			});
 		}
@@ -143,10 +139,8 @@ async fn main() -> io::Result<()>  {
 			Ok(p) => p
 		};
 
-		let mut incoming = listener.incoming();
-
-		while let Some(stream) = incoming.next().await {
-			let mut stream = stream?;
+		loop {
+			let (mut stream , _) = listener.accept().await.unwrap();
 
 			match slave_stream.write_all(&[MAGIC_FLAG[0]]).await{
 				Err(e) => {
@@ -171,8 +165,8 @@ async fn main() -> io::Result<()>  {
 				let mut buf2 = [0u8 ; 1024];
 
 				loop{
-					select! {
-						a = proxy_stream.read(&mut buf1).fuse() => {
+					tokio::select! {
+						a = proxy_stream.read(&mut buf1) => {
 		
 							let len = match a {
 								Err(_) => {
@@ -191,7 +185,7 @@ async fn main() -> io::Result<()>  {
 								break;
 							}
 						},
-						b = stream.read(&mut buf2).fuse() =>  { 
+						b = stream.read(&mut buf2) =>  { 
 							let len = match b{
 								Err(_) => {
 									break;
@@ -208,17 +202,8 @@ async fn main() -> io::Result<()>  {
 								break;
 							}
 						},
-						complete => break,
 					}
 				}
-				match stream.shutdown(std::net::Shutdown::Both){
-					Err(_) => {},
-					_ => {}
-				};
-				match proxy_stream.shutdown(std::net::Shutdown::Both){
-					Err(_) => {},
-					_ => {}
-				};
 				log::info!("transfer [{}:{}] finished" , slave_addr.ip() , slave_addr.port());
 			});
 		}

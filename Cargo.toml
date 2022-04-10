@@ -1,6 +1,6 @@
 [package]
 name = "rsocx"
-version = "0.1.3"
+version = "0.2.0"
 authors = ["b23r0 <b23r0@foxmail.com>"]
 edition = "2021"
 description = "A high performence Socks5 proxy server with bind/reverse support implementation by Rust."
@@ -13,6 +13,5 @@ license = "MIT"
 [dependencies]
 simple_logger = "2.1.0"
 log = "0.4.14"
-futures = "0.3.0"
-async-std = {version = "1" , features = ["attributes"]}
+tokio = { version = "1", features = ["full"] }
 getopts = "0.2"
