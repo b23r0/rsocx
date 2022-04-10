@@ -1,5 +1,6 @@
 use std::{ net::{Ipv6Addr, SocketAddrV6}};
 
+use net2::TcpStreamExt;
 use tokio::{net::TcpStream, io::{AsyncWriteExt, AsyncReadExt}};
 
 use crate::utils::makeword;
@@ -56,13 +57,17 @@ async fn tcp_transfer(stream : &mut TcpStream , addr : &Addr, address : &String 
 		}
 	};
 
-	let mut client = match client {
+	let client = match client {
 		Err(_) => {
 			log::warn!("connect[{}] faild" , address);
 			return;
 		},
 		Ok(p) => p
 	};
+
+	let raw_stream = client.into_std().unwrap();
+	raw_stream.set_keepalive(Some(std::time::Duration::from_secs(10))).unwrap();
+	let mut client = TcpStream::from_std(raw_stream).unwrap();
 
 	let remote_port = client.local_addr().unwrap().port();
 

@@ -2,6 +2,7 @@ mod utils;
 mod socks;
 
 use log::LevelFilter;
+use net2::TcpStreamExt;
 use simple_logger::SimpleLogger;
 use getopts::Options;
 use tokio::{io::{self, AsyncWriteExt, AsyncReadExt}, task, net::{TcpListener, TcpStream}};
@@ -77,6 +78,11 @@ async fn main() -> io::Result<()>  {
 
 		loop{
 			let (stream , _) = listener.accept().await.unwrap();
+
+			let raw_stream = stream.into_std().unwrap();
+			raw_stream.set_keepalive(Some(std::time::Duration::from_secs(10))).unwrap();
+			let stream = TcpStream::from_std(raw_stream).unwrap();
+
 			tokio::spawn(async {
 				socks::socksv5_handle(stream).await;
 			});
@@ -119,13 +125,17 @@ async fn main() -> io::Result<()>  {
 			Ok(p) => p
 		};
 
-		let (mut slave_stream , slave_addr) = match slave_listener.accept().await{
+		let (slave_stream , slave_addr) = match slave_listener.accept().await{
 			Err(e) => {
 				log::error!("error : {}", e);
 				return Ok(());
 			},
 			Ok(p) => p
 		};
+
+		let raw_stream = slave_stream.into_std().unwrap();
+		raw_stream.set_keepalive(Some(std::time::Duration::from_secs(10))).unwrap();
+		let mut slave_stream = TcpStream::from_std(raw_stream).unwrap();
 
 		log::info!("accept slave from : {}:{}" , slave_addr.ip() , slave_addr.port() );
 
@@ -140,7 +150,11 @@ async fn main() -> io::Result<()>  {
 		};
 
 		loop {
-			let (mut stream , _) = listener.accept().await.unwrap();
+			let (stream , _) = listener.accept().await.unwrap();
+
+			let raw_stream = stream.into_std().unwrap();
+			raw_stream.set_keepalive(Some(std::time::Duration::from_secs(10))).unwrap();
+			let mut stream = TcpStream::from_std(raw_stream).unwrap();
 
 			match slave_stream.write_all(&[MAGIC_FLAG[0]]).await{
 				Err(e) => {
@@ -150,13 +164,17 @@ async fn main() -> io::Result<()>  {
 				_ => {}
 			};
 
-			let (mut proxy_stream , slave_addr) = match slave_listener.accept().await{
+			let (proxy_stream , slave_addr) = match slave_listener.accept().await{
 				Err(e) => {
 					log::error!("error : {}", e);
 					return Ok(());
 				},
 				Ok(p) => p
 			};
+
+			let raw_stream = proxy_stream.into_std().unwrap();
+			raw_stream.set_keepalive(Some(std::time::Duration::from_secs(10))).unwrap();
+			let mut proxy_stream = TcpStream::from_std(raw_stream).unwrap();
 
 			log::info!("accept from slave : {}:{}" , slave_addr.ip() , slave_addr.port() );
 
@@ -222,13 +240,18 @@ async fn main() -> io::Result<()>  {
 			Ok(p) => p
 		};
 		
-		let mut master_stream = match TcpStream::connect(fulladdr.clone()).await{
+		let master_stream = match TcpStream::connect(fulladdr.clone()).await{
 			Err(e) => {
 				log::error!("error : {}", e);
 				return Ok(());
 			},
 			Ok(p) => p
 		};
+
+		let raw_stream = master_stream.into_std().unwrap();
+		raw_stream.set_keepalive(Some(std::time::Duration::from_secs(10))).unwrap();
+		let mut master_stream = TcpStream::from_std(raw_stream).unwrap();
+
 		log::info!("connect to {} success" ,fulladdr );
 		loop {
 			let mut buf = [0u8 ; 1];
@@ -248,6 +271,10 @@ async fn main() -> io::Result<()>  {
 					},
 					Ok(p) => p
 				};
+
+				let raw_stream = stream.into_std().unwrap();
+				raw_stream.set_keepalive(Some(std::time::Duration::from_secs(10))).unwrap();
+				let stream = TcpStream::from_std(raw_stream).unwrap();
 
 				task::spawn(async {
 					socks::socksv5_handle(stream).await;
