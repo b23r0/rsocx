@@ -192,7 +192,7 @@ async fn main() -> io::Result<()>  {
 								}
 								Ok(p) => p
 							};
-							match stream.write_all(&mut buf1[..len]).await {
+							match stream.write_all(&buf1[..len]).await {
 								Err(_) => {
 									break;
 								}
@@ -210,7 +210,7 @@ async fn main() -> io::Result<()>  {
 								}
 								Ok(p) => p
 							};
-							match proxy_stream.write_all(&mut buf2[..len]).await {
+							match proxy_stream.write_all(&buf2[..len]).await {
 								Err(_) => {
 									break;
 								}

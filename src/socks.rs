@@ -32,11 +32,10 @@ fn format_ip_addr(addr :& Addr) -> Result<String> {
 
 async fn tcp_transfer(stream : &mut TcpStream , addr : &Addr, address : &String , port :u16 ){
 	log::info!("proxy connect to {}" , address);
-	let client : std::io::Result<TcpStream>;
-	match addr{
+	let client  = match addr{
 		Addr::V4(_) => {
 			
-			client = TcpStream::connect(address.clone()).await;
+			TcpStream::connect(address.clone()).await
 		},
 		Addr::V6(x) => {
 			let ipv6 = Ipv6Addr::new(
@@ -50,10 +49,10 @@ async fn tcp_transfer(stream : &mut TcpStream , addr : &Addr, address : &String 
 				makeword(x[14] , x[15])
 			);
 			let v6sock = SocketAddrV6::new(ipv6 , port , 0 , 0 );
-			client = TcpStream::connect(v6sock).await;
+			TcpStream::connect(v6sock).await
 		},
 		Addr::Domain(_) => {
-			client = TcpStream::connect(address.clone()).await;
+			TcpStream::connect(address.clone()).await
 		}
 	};
 
@@ -86,19 +85,16 @@ async fn tcp_transfer(stream : &mut TcpStream , addr : &Addr, address : &String 
 		Addr::Domain(x) => {
 			reply.push(3);
 			reply.push(x.len() as u8);
-			reply.extend_from_slice(&x);
+			reply.extend_from_slice(x);
 		}
 	}
 
 	reply.push((remote_port >> 8) as u8);
 	reply.push(remote_port as u8);
 
-	match stream.write_all(&reply).await{
-		Err(e) => {
-			log::error!("error : {}" , e);
-			return;
-		}
-		_ => {}
+	if let Err(e) = stream.write_all(&reply).await{
+		log::error!("error : {}" , e);
+		return;
 	};
 
 	let mut buf1 = [0u8 ; 1024];
@@ -113,7 +109,7 @@ async fn tcp_transfer(stream : &mut TcpStream , addr : &Addr, address : &String 
 					}
 					Ok(p) => p
 				};
-				match stream.write_all(&mut buf1[..len]).await {
+				match stream.write_all(&buf1[..len]).await {
 					Err(_) => {
 						break;
 					}
@@ -131,7 +127,7 @@ async fn tcp_transfer(stream : &mut TcpStream , addr : &Addr, address : &String 
 					}
 					Ok(p) => p
 				};
-				match client.write_all(&mut buf2[..len]).await {
+				match client.write_all(&buf2[..len]).await {
 					Err(_) => {
 						break;
 					}
@@ -148,12 +144,9 @@ async fn tcp_transfer(stream : &mut TcpStream , addr : &Addr, address : &String 
 pub async fn socksv5_handle(mut stream: TcpStream) {
 	loop {
 		let mut header = [0u8 ; 2];
-		match stream.read_exact(&mut header).await{
-			Err(e) => {
-				log::error!("error : {}" , e);
-				break;
-			}
-			_ => {}
+		if let Err(e) = stream.read_exact(&mut header).await{
+			log::error!("error : {}" , e);
+			break;
 		};
 		
 		if header[0] != 5 {
@@ -162,12 +155,9 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
 		}
 	
 		let mut methods = vec![0u8; header[1] as usize].into_boxed_slice();
-		match stream.read_exact(&mut methods).await{
-			Err(e) => {
-				log::error!("error : {}" , e);
-				break;
-			}
-			_ => {}
+		if let Err(e) = stream.read_exact(&mut methods).await{
+			log::error!("error : {}" , e);
+			break;
 		};
 	
 		if !methods.contains(&0u8) {
@@ -175,21 +165,15 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
 			break;
 		}
 	
-		match stream.write_all(&[5, 0]).await{
-			Err(e) => {
-				log::error!("error : {}" , e);
-				break;
-			}
-			_ => {}
+		if let Err(e) = stream.write_all(&[5, 0]).await{
+			log::error!("error : {}" , e);
+			break;
 		};
 
 		let mut request =  [0u8; 4];
-		match stream.read_exact(&mut request).await{
-			Err(e) => {
-				log::error!("error : {}" , e);
-				break;
-			}
-			_ => {}
+		if let Err(e) = stream.read_exact(&mut request).await{
+			log::error!("error : {}" , e);
+			break;
 		};
 
 		if request[0] != 5 {
@@ -207,59 +191,44 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
 		let addr = match request[3] {
 			0x01 => {
 				let mut ipv4 =  [0u8; 4];
-				match stream.read_exact(&mut ipv4).await{
-					Err(e) => {
-						log::error!("error : {}" , e);
-						break;
-					}
-					_ => {}
+				if let Err(e) = stream.read_exact(&mut ipv4).await{
+					log::error!("error : {}" , e);
+					break;
 				};
 				Addr::V4(ipv4)
 			},
 			0x04 => {
 				let mut ipv6 =  [0u8; 16];
-				match stream.read_exact(&mut ipv6).await{
-					Err(e) => {
-						log::error!("error : {}" , e);
-						break;
-					}
-					_ => {}
+				if let Err(e) = stream.read_exact(&mut ipv6).await{
+					log::error!("error : {}" , e);
+					break;
 				};
 				Addr::V6(ipv6)
 			},
 			0x03 => {
 				let mut domain_size =  [0u8; 1];
-				match stream.read_exact(&mut domain_size).await{
-					Err(e) => {
-						log::error!("error : {}" , e);
-						break;
-					}
-					_ => {}
+				if let Err(e) = stream.read_exact(&mut domain_size).await{
+					log::error!("error : {}" , e);
+					break;
 				};
 				let mut domain =  vec![0u8; domain_size[0] as usize].into_boxed_slice();
-				match stream.read_exact(&mut domain).await{
-					Err(e) => {
-						log::error!("error : {}" , e);
-						break;
-					}
-					_ => {}
+				if let Err(e) = stream.read_exact(&mut domain).await{
+					log::error!("error : {}" , e);
+					break;
 				};
 
 				Addr::Domain(domain)
 			},
 			_ => {
-					log::error!("unknow atyp {}" , request[3]);
-					break;
+				log::error!("unknow atyp {}" , request[3]);
+				break;
 			}
 		};
 	
 		let mut port = [0u8 ; 2];
-		match stream.read_exact(&mut port).await{
-			Err(e) => {
-				log::error!("error : {}" , e);
-				break;
-			}
-			_ => {}
+		if let Err(e) = stream.read_exact(&mut port).await{
+			log::error!("error : {}" , e);
+			break;
 		};
 
 		let port = (port[0] as u16) << 8 | port[1] as u16;
