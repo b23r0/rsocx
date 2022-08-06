@@ -156,12 +156,9 @@ async fn main() -> io::Result<()>  {
 			raw_stream.set_keepalive(Some(std::time::Duration::from_secs(10))).unwrap();
 			let mut stream = TcpStream::from_std(raw_stream).unwrap();
 
-			match slave_stream.write_all(&[MAGIC_FLAG[0]]).await{
-				Err(e) => {
-					log::error!("error : {}" , e);
-					break;
-				}
-				_ => {}
+			if let Err(e) = slave_stream.write_all(&[MAGIC_FLAG[0]]).await{
+				log::error!("error : {}" , e);
+				break;
 			};
 
 			let (proxy_stream , slave_addr) = match slave_listener.accept().await{
