@@ -77,8 +77,8 @@ async fn main() -> io::Result<()>  {
 		};
 
 		loop{
-			let (stream , _) = listener.accept().await.unwrap();
-
+			let (stream , addr) = listener.accept().await.unwrap();
+			log::info!("accept from : {}" ,addr);
 			let raw_stream = stream.into_std().unwrap();
 			raw_stream.set_keepalive(Some(std::time::Duration::from_secs(10))).unwrap();
 			let stream = TcpStream::from_std(raw_stream).unwrap();
