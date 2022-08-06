@@ -1,5 +1,5 @@
 use std::{ net::{Ipv6Addr, SocketAddrV6}};
-
+use std::io::*;
 use net2::TcpStreamExt;
 use tokio::{net::TcpStream, io::{AsyncWriteExt, AsyncReadExt}};
 
@@ -12,26 +12,26 @@ pub enum Addr {
 	Domain(Box<[u8]>)
 }
 
-fn format_ip_addr(addr :& Addr) -> String {
+fn format_ip_addr(addr :& Addr) -> Result<String> {
 	match addr {
 		Addr::V4(addr) => {
-			format!("{}.{}.{}.{}" , addr[0], addr[1] ,addr[2], addr[3])
+			Ok(format!("{}.{}.{}.{}" , addr[0], addr[1] ,addr[2], addr[3]))
 		},
 		Addr::V6(addr) => {
-			format!("{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}" , addr[0], addr[1] ,addr[2], addr[3], addr[4], addr[5] ,addr[6], addr[7] , addr[8], addr[9] ,addr[10], addr[11], addr[12], addr[13] ,addr[14], addr[15])
+			Ok(format!("{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}" , addr[0], addr[1] ,addr[2], addr[3], addr[4], addr[5] ,addr[6], addr[7] , addr[8], addr[9] ,addr[10], addr[11], addr[12], addr[13] ,addr[14], addr[15]))
 		},
 		Addr::Domain(addr) => match String::from_utf8(addr.to_vec()) {
-			Ok(p) => p ,
+			Ok(p) => Ok(p) ,
 			Err(e) => {
 				log::error!("parse domain faild. {}" , e);
-				"".to_string()
+				Err(std::io::Error::new(std::io::ErrorKind::InvalidData, "invalid domain"))
 			},
 		}
 	}
 }
 
 async fn tcp_transfer(stream : &mut TcpStream , addr : &Addr, address : &String , port :u16 ){
-	log::info!("proxy connect to {}:{}" , format_ip_addr(&addr) , port);
+	log::info!("proxy connect to {}" , address);
 	let client : std::io::Result<TcpStream>;
 	match addr{
 		Addr::V4(_) => {
@@ -263,7 +263,13 @@ pub async fn socksv5_handle(mut stream: TcpStream) {
 		};
 
 		let port = (port[0] as u16) << 8 | port[1] as u16;
-		let address = format!("{}:{}" , format_ip_addr(&addr) , port);
+		let address_prefix = match format_ip_addr(&addr){
+			Err(_) => {
+				break;
+			}
+			Ok(p) => p
+		};
+		let address = format!("{}:{}" , address_prefix , port);
 
 		if cmd == 1 {
 			tcp_transfer(&mut stream , &addr , &address , port).await;
