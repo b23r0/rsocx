@@ -32,7 +32,7 @@ First listen a port waiting for slave connection
 
 then reverse connect to master in slave
 
-`$> ./cliws -r 127.0.0.1:8000`
+`$> ./rsocx -r 127.0.0.1:8000`
 
 # Benchmark
 
