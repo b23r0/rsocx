@@ -16,7 +16,6 @@ fn usage(program: &str, opts: &Options) {
     print!("{}", opts.usage(&brief));
 }
 
-
 #[tokio::main]
 async fn main() -> io::Result<()>  {
 	SimpleLogger::new().with_utc_timestamps().with_utc_timestamps().with_colors(true).init().unwrap();
